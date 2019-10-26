@@ -124,8 +124,6 @@ void Heap::Iter(int iter_index){
     //Заменяем
     window.at(temp) = buffer[iter_index];
     SiftDown(temp); //  просеивание
-
-
 }
 
 int main() {
@@ -150,7 +148,5 @@ int main() {
     for (int i = 0; i < heap.buffer_size - heap.window_size + 1; i++) {
         std::cout << heap.res[i] << " ";
     }
-
-
 }
 
