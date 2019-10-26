@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 /*
 2_4. Скользящий максимум
@@ -39,23 +40,37 @@
 class Heap {
 public:
     ~Heap();
-    int buffer[10] = {1, 2, 8, -1, 2, 23, 4, 3, 3, 3};
-    int buffer_len = 10;
+    explicit Heap(int n);
+    // Массив всех значений
+    int * buffer = nullptr;
+    // Массив окна
+    std::vector<int> window = {};
+    std::vector<int> memory = {};
+    std::vector<int>res = {};
 
-    int old_element = NULL;
-    int new_element = NULL;
+    int buffer_size = 0;
+    int window_size = 0;
 
     void InitBuffer();
 
-    void SiftDown(int i);
-
+    void Iter(int iter_index);
     void BuildHeap();
 
 private:
+    // Индкс теукщей позиции окна, используется в Iter
+
+    void SiftDown(int i);
 
 };
 
+Heap::Heap(int n) {
+    buffer_size = n;
+    buffer = new int[n];
+}
+
+
 Heap::~Heap() {
+    delete [] buffer;
 }
 
 void Heap::SiftDown(int i){
@@ -63,152 +78,79 @@ void Heap::SiftDown(int i){
     int right = 2 * i + 2;
 
     int largest = i;
-    if (left < buffer_len && buffer[left] > buffer[i]) {
+    if (left < window_size && window[left] > window[i]) {
         largest = left;
     }
-    if (right < buffer_len && buffer[right] > buffer[largest]){
+    if (right < window_size && window[right] > window[largest]){
         largest = right;
     }
     if (largest != i){
-        std::swap(buffer[i], buffer[largest]);
+        std::swap(window[i], window[largest]);
+        std::swap(memory[i], memory[largest]);
         SiftDown(largest);
     }
 }
 
 void Heap::BuildHeap() {
-    for (int i = buffer_len / 2 - 1; i >= 0; --i){
+    for (int i = window_size / 2 - 1; i >= 0; --i){
         SiftDown(i);
     }
 }
 
-
-/*
-bool Queue::empty() const {
-    return capacity == 0;
+void Heap::InitBuffer(){
+    for (int i = 0; i < window_size; i++){
+        window.insert(window.end(), buffer[i]);
+        memory.insert(memory.end(), i);
+    }
+    BuildHeap();
 }
 
-void Queue::expand() {
-    size +=1;
-    if (size == 1){
-        copy(0, 1);
-        head = 0;
-        tail = 0;
+void Heap::Iter(int iter_index){
+    int temp = 0;
+
+    //  добавили максимальный элемент
+    res.insert(res.end(), window[temp]);
+
+    for (int j = 0; j < window_size; j++){
+        if (memory[j] == 0){
+
+            memory[j] = window_size - 1; // Если memory[j] == 0, то выпадает это число
+            temp = j; // сохраняем индекс выпадения
+        }
+        else{
+            memory[j] -= 1;
+        }
     }
-    else if (size > capacity){
-        copy(capacity, 2*capacity);
-        head = 0;
-        tail = capacity / 2 - 1;
-    }
+    //Заменяем
+    window.at(temp) = buffer[iter_index];
+    SiftDown(temp); //  просеивание
+
+
 }
 
-void Queue::squeeze() {
-    size -=1;
-
-    if (size == 0){
-        copy(1, 0);
-        head = 0;
-        tail = 0;
-    }
-
-    else if (2*size == capacity){
-        copy(capacity, capacity / 2);
-        head = 0;
-        tail = capacity - 1;
-    }
-}
-
-void Queue::copy(int old_capacity, int new_capacity) {
-    capacity = new_capacity;
-
-    if (new_capacity == 0){
-        delete [] buffer;
-        buffer = nullptr;
-        return;
-    }
-
-    int * new_buffer = new int[new_capacity];
-
-    for (int i = 0; i < old_capacity; i++){
-        new_buffer[i] = buffer[(head + i) % old_capacity];
-    }
-
-    delete [] buffer;
-    buffer = new_buffer;
-}
-
-void Queue::push_front(int value) {
-    expand();
-    head -=1;
-    if (head < 0){
-        head = capacity -1;
-    }
-    buffer[head] = value;
-}
-
-void Queue::push_back(int value) {
-    expand();
-    tail += 1;
-    if (tail > capacity){
-        tail = 0;
-    }
-    if (capacity == 1){
-        tail = 0;
-    }
-    buffer[tail] = value;
-}
-
-
-int Queue::pop_front() {
-    int value = buffer[head];
-    head +=1;
-    squeeze();
-    if (head > capacity - 1){
-        head = 0;
-    }
-    return value;
-}
-
-int Queue::pop_back() {
-    int value = buffer[tail];
-    tail -=1;
-    squeeze();
-    if (tail < 0){
-        tail = capacity -1;
-    }
-    return value;
-}
-
-*/
 int main() {
     int commands_count = 0;
+
     std::cin >> commands_count;
-    Heap heap;
+    Heap heap(commands_count);
+    for (int i = 0; i < heap.buffer_size; i++) {
+        std::cin >> heap.buffer[i];
+    }
+    std::cin >> heap.window_size;
+    heap.InitBuffer();
 
-    heap.BuildHeap();
 
-    for (int i = 0; i < heap.buffer_len; i++){
-        std::cout << heap.buffer[i] << " ";
+    for (int i = heap.window_size; i < heap.buffer_size ; i++) {
+        heap.Iter(i);
     }
 
-    // TODO: Как читать в массив !!!!
+    heap.BuildHeap();
+    heap.res.insert(heap.res.end(), heap.window[0]);
+
+    for (int i = 0; i < heap.buffer_size - heap.window_size + 1; i++) {
+        std::cout << heap.res[i] << " ";
+    }
+
 
 }
 
-/*
- *
-tijoforyou
-Aug '13
-If you are referring to the sample input like this:
-
-7
-12 34 56 78 76 54 32
-then, you can use
-
-cin >> sizeofarray;
-for (int i = 0; i < sizeofarray; ++i)
-{
-    cin >> a*;
-}
-That is, you need not do anything special. Just read the array elements one-by-one like you would do otherwise.
- *
- */
