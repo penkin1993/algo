@@ -133,12 +133,12 @@ int main() {
 
     std::cin >> commands_count;
     Heap heap(commands_count);
+
     for (int i = 0; i < heap.buffer_size; i++) {
         std::cin >> heap.buffer[i];
     }
     std::cin >> heap.window_size;
     heap.InitBuffer();
-
 
     for (int i = heap.window_size; i < heap.buffer_size ; i++) {
         heap.Iter(i);
