@@ -46,7 +46,7 @@ public:
     // Массив окна
     int * window = nullptr;
     int * memory = nullptr;
-    std::vector<int>res = {};
+    int * res = nullptr;
 
     int buffer_size = 0;
     int window_size = 0;
@@ -102,6 +102,7 @@ void Heap::BuildHeap() {
 void Heap::InitBuffer(){
     window  = new int[window_size];
     memory  = new int[window_size];
+    res = new int [buffer_size + window_size -1];
 
     for (int i = 0; i < window_size; i++){
         window[i] = buffer[i];
@@ -113,7 +114,7 @@ void Heap::InitBuffer(){
 void Heap::Iter(int iter_index){
     int temp = 0;
     //  добавили максимальный элемент
-    res.push_back(window[0]);
+    res[iter_index - window_size] = window[0];
 
     for (int j = 0; j < window_size; j++){
         if (memory[j] != 0){
@@ -148,8 +149,7 @@ int main() {
         heap.Iter(i);
     }
 
-    heap.BuildHeap();
-    heap.res.push_back(heap.window[0]);
+    heap.res[heap.buffer_size - heap.window_size] = heap.window[0];
 
     for (int i = 0; i < heap.buffer_size - heap.window_size + 1; i++) {
         std::cout << heap.res[i] << " ";
@@ -161,3 +161,5 @@ int main() {
  4 4 4 0 0 0 1 -12
  3
 */
+
+
