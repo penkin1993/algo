@@ -44,8 +44,8 @@ public:
     // Массив всех значений
     int * buffer = nullptr;
     // Массив окна
-    std::vector<int> window = {};
-    std::vector<int> memory = {};
+    int * window = nullptr;
+    int * memory = nullptr;
     std::vector<int>res = {};
 
     int buffer_size = 0;
@@ -70,8 +70,8 @@ Heap::Heap(int n) {
 
 
 Heap::~Heap() {
-    window.clear();
-    memory.clear();
+    delete [] window;
+    delete [] memory;
     delete [] buffer;
 }
 
@@ -100,9 +100,12 @@ void Heap::BuildHeap() {
 }
 
 void Heap::InitBuffer(){
+    window  = new int[window_size];
+    memory  = new int[window_size];
+
     for (int i = 0; i < window_size; i++){
-        window.insert(window.end(), buffer[i]);
-        memory.insert(memory.end(), i);
+        window[i] = buffer[i];
+        memory[i]  = i;
     }
     BuildHeap();
 }
@@ -110,7 +113,7 @@ void Heap::InitBuffer(){
 void Heap::Iter(int iter_index){
     int temp = 0;
     //  добавили максимальный элемент
-    res.insert(res.end(), window[0]);
+    res.push_back(window[0]);
 
     for (int j = 0; j < window_size; j++){
         if (memory[j] != 0){
@@ -121,7 +124,7 @@ void Heap::Iter(int iter_index){
             temp = j; // сохраняем индекс выпадения
         }
     }
-    window.at(temp) = buffer[iter_index];
+    window[temp] = buffer[iter_index];
 
     std::swap(window[temp], window[0]); // поднимаем элемент наверх кучи
     std::swap(memory[temp], memory[0]);
@@ -146,11 +149,15 @@ int main() {
     }
 
     heap.BuildHeap();
-    heap.res.insert(heap.res.end(), heap.window[0]);
+    heap.res.push_back(heap.window[0]);
 
     for (int i = 0; i < heap.buffer_size - heap.window_size + 1; i++) {
         std::cout << heap.res[i] << " ";
     }
 }
 
-
+/*
+ 8
+ 4 4 4 0 0 0 1 -12
+ 3
+*/
