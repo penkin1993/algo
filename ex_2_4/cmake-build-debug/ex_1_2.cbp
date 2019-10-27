@@ -83,6 +83,9 @@
 		<Unit filename="/Users/grigorijpenkin/Documents/pr_a/algo/ex_2_4/main.cpp">
 			<Option target="ex_1_2"/>
 		</Unit>
+		<Unit filename="/Users/grigorijpenkin/Documents/pr_a/algo/ex_2_4/main_first.txt">
+			<Option target="ex_1_2"/>
+		</Unit>
 		<Unit filename="/Users/grigorijpenkin/Documents/pr_a/algo/ex_2_4/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

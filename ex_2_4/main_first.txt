@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 /*
 2_4. Скользящий максимум
@@ -100,13 +101,13 @@ void Heap::BuildHeap() {
 }
 
 void Heap::InitBuffer(){
-    window = new int[window_size];
-    memory = new int[window_size];
-    res = new int [buffer_size + window_size - 1];
+    window  = new int[window_size];
+    memory  = new int[window_size];
+    res = new int [buffer_size + window_size -1];
 
     for (int i = 0; i < window_size; i++){
         window[i] = buffer[i];
-        memory[i] = i;
+        memory[i]  = i;
     }
     BuildHeap();
 }
@@ -148,6 +149,7 @@ int main() {
     for (int i = heap.window_size; i < heap.buffer_size ; i++) {
         heap.Iter(i);
     }
+
     heap.res[heap.buffer_size - heap.window_size] = heap.window[0];
 
     for (int i = 0; i < heap.buffer_size - heap.window_size + 1; i++) {
