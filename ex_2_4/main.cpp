@@ -70,6 +70,8 @@ Heap::Heap(int n) {
 
 
 Heap::~Heap() {
+    window.clear();
+    memory.clear();
     delete [] buffer;
 }
 
@@ -111,18 +113,17 @@ void Heap::Iter(int iter_index){
     res.insert(res.end(), window[0]);
 
     for (int j = 0; j < window_size; j++){
-        if (memory[j] == 0){
-
-            memory[j] = window_size - 1; // Если memory[j] == 0, то выпадает это число
-            temp = j; // сохраняем индекс выпадения
+        if (memory[j] != 0){
+            memory[j] -= 1;
         }
         else{
-            memory[j] -= 1;
+            memory[j] = window_size - 1; // Если memory[j] == 0, то выпадает это число
+            temp = j; // сохраняем индекс выпадения
         }
     }
     window.at(temp) = buffer[iter_index];
 
-    std::swap(window[temp], window[0]);
+    std::swap(window[temp], window[0]); // поднимаем элемент наверх кучи
     std::swap(memory[temp], memory[0]);
 
     SiftDown(0); //  просеивание
