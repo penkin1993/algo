@@ -107,9 +107,8 @@ void Heap::InitBuffer(){
 
 void Heap::Iter(int iter_index){
     int temp = 0;
-
     //  добавили максимальный элемент
-    res.insert(res.end(), window[temp]);
+    res.insert(res.end(), window[0]);
 
     for (int j = 0; j < window_size; j++){
         if (memory[j] == 0){
@@ -121,9 +120,12 @@ void Heap::Iter(int iter_index){
             memory[j] -= 1;
         }
     }
-    //Заменяем
     window.at(temp) = buffer[iter_index];
-    SiftDown(temp); //  просеивание
+
+    std::swap(window[temp], window[0]);
+    std::swap(memory[temp], memory[0]);
+
+    SiftDown(0); //  просеивание
 }
 
 int main() {
@@ -149,4 +151,5 @@ int main() {
         std::cout << heap.res[i] << " ";
     }
 }
+
 
