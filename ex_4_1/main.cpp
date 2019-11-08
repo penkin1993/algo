@@ -12,30 +12,53 @@
 Указание: количество инверсий может быть больше 4*1000000000 - используйте int64_t.
 */
 
+#include <random>
 #include <iostream>
+#include <utility>
 #include <vector>
 
-class Inversion{
+
+class OrderStat{
 public:
-    explicit Inversion(std::vector<int64_t> arr);
-    int64_t call();
+    explicit OrderStat(int_fast64_t order, std::vector<int_fast64_t> arr);
+    int_fast64_t pointer;
+    int_fast64_t order;
+    std::vector<int_fast64_t> array;
+
+    int_fast64_t call(); // запуск метода
+    void partition(int_fast64_t leftPointer, int_fast64_t rightPointer); // реализация алгоритма partition
+    static int_fast64_t getPointer(int_fast64_t leftPointer, int_fast64_t rightPointer); // вернуть опорный элемент элемент
 
 private:
-    std::vector<int64_t> array;
-    int64_t counter = 0; // счетчик числа инверсий
-    void counter_run(int64_t left_pointer, int64_t right_pointer);
-    void counter_inv(int64_t left_pointer, int64_t mean_pointer, int64_t right_pointer);
+
 };
 
-Inversion::Inversion(std::vector<int64_t> arr){
+OrderStat::OrderStat(int_fast64_t ord, std::vector<int_fast64_t> arr){
+    order = ord;
     array = std::move(arr);
 }
 
-int64_t Inversion::call(){
-    counter_run(0, array.size());
-    return counter;
+int_fast64_t OrderStat::call() {
+
+
+    return array[pointer];
 }
 
+int_fast64_t OrderStat::getPointer(int_fast64_t leftPointer, int_fast64_t rightPointer){
+    std::uniform_real_distribution<int> distribution(leftPointer,rightPointer);
+    return 0; // выбор медианы
+}
+
+void OrderStat::partition(int_fast64_t leftPointer, int_fast64_t rightPointer) {
+    int localPointer = getPointer(leftPointer, rightPointer);
+
+    // swap с последним
+    //counter_run(0, array.size());
+}
+
+
+
+/*
 void Inversion::counter_run(int64_t left_pointer, int64_t right_pointer){
     if (right_pointer - left_pointer <= 1){
         return;
@@ -76,16 +99,34 @@ void Inversion::counter_inv(int64_t left_pointer, int64_t mean_pointer, int64_t 
         array[left_pointer + i] = new_part[i];
     }
 }
+*/
 
 int main() {
-    std::vector<int64_t> arr;
-    std::string line;
-    getline(std::cin, line);
-    while (!line.empty()) {
-        arr.push_back(std::stoi(line));
-        getline(std::cin, line);
+    /*
+    int_fast64_t arraySize;
+    int_fast64_t ord;
+    int_fast64_t newElement;
+
+    std::vector<int_fast64_t> arr;
+    std::cin >> arraySize >> ord;
+
+    for (int_fast64_t i = 0; i < arraySize; ++i){
+        std::cin >> newElement;
+        arr.push_back(newElement);
     }
-    Inversion inversion(arr);
-    std::cout << inversion.call() << "\n";
+
+    OrderStat orderStat(ord, arr);
+    */
+
+    std::uniform_real_distribution<int> distribution(5,15);
+    // TODO Проверить !!!
+
+
+    //std::cout << orderStat.call() << "\n";
+
+    //for (int i = 0; i < arraySize; ++i){
+    //    std::cout << arr[i] << "\n";
+    //}
+
     return 0;
 }
