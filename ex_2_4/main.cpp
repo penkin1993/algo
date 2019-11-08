@@ -41,18 +41,15 @@ public:
     ~Heap();
     explicit Heap(int n);
     // Массив всех значений
-    int * buffer = nullptr;
+    //int * buffer = nullptr;
     // Массив окна
-    int * window = nullptr;
-    int * memory = nullptr;
-    int * res = nullptr;
+    int_fast8_t * window = nullptr;
+    int_fast8_t * memory = nullptr;
 
     int buffer_size = 0;
     int window_size = 0;
 
-    void InitBuffer();
-
-    void Iter(int iter_index);
+    int Iter(int iter_index, int val);
     void BuildHeap();
 
 private:
@@ -64,15 +61,12 @@ private:
 
 Heap::Heap(int n) {
     buffer_size = n;
-    buffer = new int[n];
+    //buffer = new int[n];
 }
-
 
 Heap::~Heap() {
     delete [] window;
     delete [] memory;
-    delete [] buffer;
-    delete [] res;
 }
 
 void Heap::SiftDown(int i){
@@ -99,22 +93,11 @@ void Heap::BuildHeap() {
     }
 }
 
-void Heap::InitBuffer(){
-    window = new int[window_size];
-    memory = new int[window_size];
-    res = new int [buffer_size + window_size - 1];
 
-    for (int i = 0; i < window_size; i++){
-        window[i] = buffer[i];
-        memory[i] = i;
-    }
-    BuildHeap();
-}
-
-void Heap::Iter(int iter_index){
+int Heap::Iter(int iter_index, int val){
     int temp = 0;
     //  добавили максимальный элемент
-    res[iter_index - window_size] = window[0];
+    //res[iter_index - window_size] = window[0];
 
     for (int j = 0; j < window_size; j++){
         if (memory[j] != 0){
@@ -125,12 +108,14 @@ void Heap::Iter(int iter_index){
             temp = j; // сохраняем индекс выпадения
         }
     }
-    window[temp] = buffer[iter_index];
+    window[temp] = val;
 
     std::swap(window[temp], window[0]); // поднимаем элемент наверх кучи
     std::swap(memory[temp], memory[0]);
 
     SiftDown(0); //  просеивание
+
+    return window[0];
 }
 
 int main() {
@@ -139,19 +124,33 @@ int main() {
     std::cin >> commands_count;
     Heap heap(commands_count);
 
+    int buffer[commands_count];
+
     for (int i = 0; i < heap.buffer_size; i++) {
-        std::cin >> heap.buffer[i];
+        std::cin >> buffer[i];
     }
     std::cin >> heap.window_size;
-    heap.InitBuffer();
 
-    for (int i = heap.window_size; i < heap.buffer_size ; i++) {
-        heap.Iter(i);
+
+    heap.window = new int_fast8_t[heap.window_size];
+    heap.memory = new int_fast8_t[heap.window_size];
+    int res[heap.buffer_size + heap.window_size - 1];
+
+    for (int i = 0; i < heap.window_size; i++){
+        heap.window[i] = buffer[i];
+        heap.memory[i] = i;
     }
-    heap.res[heap.buffer_size - heap.window_size] = heap.window[0];
+    heap.BuildHeap();
+
+    res[0] = heap.window[0];
+
+    for (int i = heap.window_size; i < heap.buffer_size + 1 ; i++) {
+        res[i - heap.window_size + 1] = heap.Iter(i, buffer[i]);
+    }
+    //res[heap.buffer_size - heap.window_size] = heap.window[0];
 
     for (int i = 0; i < heap.buffer_size - heap.window_size + 1; i++) {
-        std::cout << heap.res[i] << " ";
+        std::cout << res[i] << " ";
     }
 }
 

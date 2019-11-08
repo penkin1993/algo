@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_3_3/main.cpp
+stdint.h
+-
+iostream
+-
+vector
+-
+
