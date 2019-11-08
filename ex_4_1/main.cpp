@@ -23,29 +23,34 @@
 #include <random>
 #include <iostream>
 #include <utility>
-#include <vector>
 
 class OrderStat {
 public:
-    explicit OrderStat(int_fast64_t order, std::vector<int_fast64_t> arr);
-    int_fast64_t call(); // запуск основного метода
+    ~OrderStat();
+    explicit OrderStat(int order, int * arr, int size);
+    int call(); // запуск основного метода
 private:
-    int_fast64_t order;
-    std::vector<int_fast64_t> array;
-    int_fast64_t partition(int_fast64_t leftPointer, int_fast64_t rightPointer); // реализация алгоритма partition
-    int_fast64_t getPointer(int_fast64_t leftPointer, int_fast64_t rightPointer); // вернуть медиану
-    static int_fast64_t getRand(int_fast64_t leftPointer, int_fast64_t rightPointer); // случайный элемент
+    int size;
+    int order;
+    int * array;
+    int partition(int leftPointer, int rightPointer); // реализация алгоритма partition
+    int getPointer(int leftPointer, int rightPointer); // вернуть медиану
+    static int getRand(int leftPointer, int rightPointer); // случайный элемент
 };
 
-int_fast64_t OrderStat::getRand(int_fast64_t leftPointer, int_fast64_t rightPointer) {
+OrderStat:: ~OrderStat() {
+    delete [] array;
+}
+
+int OrderStat::getRand(int leftPointer, int rightPointer) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(leftPointer, rightPointer);
     return dis(gen); // случайный int из промежутка
 }
 
-int_fast64_t OrderStat::getPointer(int_fast64_t leftPointer, int_fast64_t rightPointer) {
-    int_fast64_t s1, s2, s3;
+int OrderStat::getPointer(int leftPointer, int rightPointer) {
+    int s1, s2, s3;
     s1 = getRand(leftPointer, rightPointer);
     s2 = getRand(leftPointer, rightPointer);
     s3 = getRand(leftPointer, rightPointer);
@@ -58,15 +63,16 @@ int_fast64_t OrderStat::getPointer(int_fast64_t leftPointer, int_fast64_t rightP
 
 }
 
-OrderStat::OrderStat(int_fast64_t ord, std::vector<int_fast64_t> arr) {
+OrderStat::OrderStat(int ord, int * arr, int s) {
     order = ord;
-    array = std::move(arr);
+    array = arr;
+    size = s;
 }
 
-int_fast64_t OrderStat::call() {
-    int_fast64_t leftPointer = 0;
-    int_fast64_t rightPointer = array.size();
-    int_fast64_t pointer = partition(leftPointer, rightPointer); // нулевая итерация
+int OrderStat::call() {
+    int leftPointer = 0;
+    int rightPointer = size;
+    int pointer = partition(leftPointer, rightPointer); // нулевая итерация
     while (true) {
         if (pointer == order) {
             return array[pointer];
@@ -78,15 +84,15 @@ int_fast64_t OrderStat::call() {
     }
 }
 
-int_fast64_t OrderStat::partition(int_fast64_t leftPointer, int_fast64_t rightPointer) {
+int OrderStat::partition(int leftPointer, int rightPointer) {
     int localPointer = getPointer(leftPointer, rightPointer);
-    std::swap(array[localPointer], array[array.size() - 1]);
-    int_fast64_t val = array[array.size() - 1];
+    std::swap(array[localPointer], array[size - 1]);
+    int val = array[size - 1];
 
-    int_fast64_t i = leftPointer;
-    int_fast64_t j = leftPointer;
+    int i = leftPointer;
+    int j = leftPointer;
 
-    while (j < array.size() - 1) {
+    while (j < size - 1) {
         if (array[j] > val) {
             j++;
         } else {
@@ -95,25 +101,22 @@ int_fast64_t OrderStat::partition(int_fast64_t leftPointer, int_fast64_t rightPo
             j++;
         }
     }
-    std::swap(array[i], array[array.size() - 1]);
+    std::swap(array[i], array[size - 1]);
     return i;
 }
 
 int main() {
-    int_fast64_t arraySize;
-    int_fast64_t ord;
-    int_fast64_t newElement;
+    int arraySize = 0;
+    int ord;
+    int newElement;
 
-    std::vector<int_fast64_t> arr;
     std::cin >> arraySize >> ord;
+    int * arr = new int[arraySize];
 
-    for (int_fast64_t i = 0; i < arraySize; ++i) {
+    for (int i = 0; i < arraySize; ++i) {
         std::cin >> newElement;
-        arr.push_back(newElement);
+        arr[i] = newElement;
     }
-
-    OrderStat orderStat(ord, arr);
+    OrderStat orderStat(ord, arr, arraySize);
     std::cout << orderStat.call();
-
-    return 0;
 }
