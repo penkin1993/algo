@@ -77,9 +77,9 @@ int OrderStat::call() {
         if (pointer == order) {
             return array[pointer];
         } else if (pointer > order) {
-            rightPointer = pointer - 1;
+            rightPointer = pointer;
         } else {
-            leftPointer = pointer + 1;
+            leftPointer = pointer;
         }
     }
 }
@@ -120,3 +120,4 @@ int main() {
     OrderStat orderStat(ord, arr, arraySize);
     std::cout << orderStat.call();
 }
+

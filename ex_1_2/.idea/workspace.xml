@@ -13,7 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="bc1e90b4-2529-41d6-8c90-4f9756ea3240" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/CMakeFiles/ex_4_1.dir/main.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/CMakeFiles/ex_4_1.dir/main.cpp.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/ex_4_1" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/ex_4_1" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ex_4_1/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_4_1/main.cpp" afterDir="false" />
     </list>
