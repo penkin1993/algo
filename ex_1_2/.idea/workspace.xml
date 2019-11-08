@@ -12,15 +12,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bc1e90b4-2529-41d6-8c90-4f9756ea3240" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../ex_4_1/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ex_4_1/.idea/ex_4_1.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ex_4_1/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ex_4_1/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ex_4_1/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ex_4_1/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ex_4_1/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ex_3_3/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_3_3/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/CMakeFiles/ex_4_1.dir/CXX.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/CMakeFiles/ex_4_1.dir/CXX.includecache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/CMakeFiles/ex_4_1.dir/main.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/CMakeFiles/ex_4_1.dir/main.cpp.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/ex_4_1" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_4_1/cmake-build-debug/ex_4_1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ex_4_1/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_4_1/main.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -79,6 +75,7 @@
       <workItem from="1572022505859" duration="371000" />
       <workItem from="1572064229266" duration="111000" />
       <workItem from="1573220681391" duration="1947000" />
+      <workItem from="1573234746277" duration="233000" />
     </task>
     <servers />
   </component>
