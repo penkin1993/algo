@@ -72,27 +72,27 @@ OrderStat::OrderStat(int ord, int * arr, int s) {
 int OrderStat::call() {
     int leftPointer = 0;
     int rightPointer = size;
-    int pointer = partition(leftPointer, rightPointer); // нулевая итерация
     while (true) {
+        int pointer = partition(leftPointer, rightPointer);
         if (pointer == order) {
             return array[pointer];
         } else if (pointer > order) {
-            pointer = partition(leftPointer, pointer - 1);
+            rightPointer = pointer - 1;
         } else {
-            pointer = partition(pointer + 1, rightPointer);
+            leftPointer = pointer + 1;
         }
     }
 }
 
 int OrderStat::partition(int leftPointer, int rightPointer) {
     int localPointer = getPointer(leftPointer, rightPointer);
-    std::swap(array[localPointer], array[size - 1]);
-    int val = array[size - 1];
+    std::swap(array[localPointer], array[rightPointer - 1]);
+    int val = array[rightPointer - 1];
 
     int i = leftPointer;
     int j = leftPointer;
 
-    while (j < size - 1) {
+    while (j < rightPointer - 1) {
         if (array[j] > val) {
             j++;
         } else {
@@ -101,7 +101,7 @@ int OrderStat::partition(int leftPointer, int rightPointer) {
             j++;
         }
     }
-    std::swap(array[i], array[size - 1]);
+    std::swap(array[i], array[rightPointer - 1]);
     return i;
 }
 
