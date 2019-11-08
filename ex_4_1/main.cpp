@@ -77,9 +77,9 @@ int OrderStat::call() {
         if (pointer == order) {
             return array[pointer];
         } else if (pointer > order) {
-            pointer = partition(leftPointer, pointer);
+            pointer = partition(leftPointer, pointer - 1);
         } else {
-            pointer = partition(pointer, rightPointer);
+            pointer = partition(pointer + 1, rightPointer);
         }
     }
 }
