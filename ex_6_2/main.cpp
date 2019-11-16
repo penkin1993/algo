@@ -25,6 +25,7 @@ out
 
 #include <iostream>
 #include <stack>
+#include <deque>
 
 // Узел бинарного дерева
 struct TreeNode {
@@ -40,15 +41,27 @@ struct TreeNode {
 class Tree {
 public:
     ~Tree();
-
-    void Print(); // Обход и распечатка всех значений
+    void Print(); // Печать всех значений
     void Add(int value); // Добавление значения в дерево
 private:
+    std::deque<TreeNode *> GetDeque(); // Иттератор для обхода
     TreeNode *root = nullptr;
 };
 
 Tree::~Tree() {
-    // TODO
+    std::deque<TreeNode *> final_deque = GetDeque();
+    while (!final_deque.empty()) {
+        delete final_deque.front();
+        final_deque.pop_front();
+    }
+}
+
+void Tree::Print() {
+    std::deque<TreeNode *> final_deque = GetDeque();
+    while (!final_deque.empty()) {
+        std::cout << final_deque.front()->value << " ";
+        final_deque.pop_front();
+    }
 }
 
 void Tree::Add(int value) {
@@ -75,24 +88,26 @@ void Tree::Add(int value) {
 }
 
 
-void Tree::Print() { // TODO: В отдельный метод ???
+std::deque<TreeNode *> Tree::GetDeque() {
+    std::deque<TreeNode *> final_deque;
     if (!root) {
-        return;
+        return final_deque;
     }
     TreeNode *local_node = root;
-    std::stack<TreeNode> local_stack;
+    std::stack<TreeNode *> local_stack;
 
     while ((local_node != nullptr) || (!local_stack.empty())) {
         if (local_node != nullptr) {
-            local_stack.push(*local_node);
+            local_stack.push(local_node);
             local_node = local_node->left;
         } else if (!local_stack.empty()) {
-            local_node = &local_stack.top();
+            local_node = local_stack.top();
             local_stack.pop();
-            std::cout << local_node->value << " ";
+            final_deque.push_back(local_node);
             local_node = local_node->right;
         }
     }
+    return final_deque;
 }
 
 
