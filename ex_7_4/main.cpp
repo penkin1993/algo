@@ -16,28 +16,49 @@
 
 // Узел бинарного дерева
 struct TreeNode {
-    int value = 0;
+    explicit TreeNode(int64_t _value, TreeNode *_parent) :
+            value(_value),
+            parent(_parent) {}
+
+    int64_t value = 0;
+    TreeNode *parent = nullptr;
     TreeNode *left = nullptr;
     TreeNode *right = nullptr;
-
-    TreeNode(int _value, TreeNode *_parent) {
-        value = _value;
-    }
 };
 
 class Tree {
 public:
     ~Tree();
-    void Add(int value); // Добавление значения в дерево
+
+    void Add(int64_t value);
+
+    void Splay(TreeNode *node);
+
+    void Split();
+
+    void Remove();
+
+    void GetStat();
+
 private:
     TreeNode *root = nullptr;
+
+    void Zig(TreeNode *root);
+
+    void Zag(TreeNode *root);
+
+    void ZigZig(TreeNode *root);
+
+    void ZagZag(TreeNode *root);
+
+    void ZigZag(TreeNode *root);
 };
 
 Tree::~Tree() {
     // TODO:
 }
 
-void Tree::Add(int value) {
+void Tree::Add(int64_t value) {
     TreeNode *local_node = root;
     if (!local_node) {
         root = new TreeNode(value, nullptr);
@@ -60,46 +81,36 @@ void Tree::Add(int value) {
     }
 }
 
+void Tree::Zig(TreeNode *root) {
+    TreeNode *node = root;
+    root = node->left;
+    node->left = root->right;
+    root->right = node;
+}
+
+void Tree::Zag(TreeNode *root) {
+    TreeNode *node = root;
+    root = node->right;
+    node->right = root->left;
+    root->left = node;
+}
+
+void Tree::ZigZig(TreeNode *root) {
+    Zig(root);
+    Zig(root);
+}
+
+void Tree::ZagZag(TreeNode *root) {
+    Zag(root);
+    Zag(root);
+}
+
+void Tree::ZigZag(TreeNode *root) {
+    Zig(root->left);
+    Zag(root);
+}
+
 /*
-void RightTurn(Node *&parent) {
-    Node *node = parent;
-    parent = node->Left;
-    node->Left = parent->Right;
-    parent->Right = node;
-}
-
-void LeftTurn(Node *&parent) {
-    Node *node = parent;
-    parent = node->Right;
-    node->Right = parent->Left;
-    parent->Left = node;
-}
-
-void BigRightTurn(Node *&parent) {
-    LeftTurn(parent->Left);
-    RightTurn(parent);
-}
-
-void BigLeftTurn(Node *&parent) {
-    RightTurn(parent->Right);
-    LeftTurn(parent);
-}
-
-void ZigZig(Node *&parent) {
-    RightTurn(parent);
-    RightTurn(parent);
-}
-
-void ZagZag(Node *&parent) {
-    LeftTurn(parent);
-    LeftTurn(parent);
-}
-
-void ZigZag(Node *&parent) {
-    RightTurn(parent->Left);
-    LeftTurn(parent);
-}
-
 void print(const std::string &prefix, const Node *node) {
     if (!node) {
         return;
