@@ -26,8 +26,8 @@
 
 class OrderStat {
 public:
-    ~OrderStat();
     explicit OrderStat(int order, int * arr, int size);
+    ~OrderStat();
     int call(); // запуск основного метода
 private:
     int size;
