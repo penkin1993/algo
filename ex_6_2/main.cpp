@@ -29,13 +29,10 @@ out
 
 // Узел бинарного дерева
 struct TreeNode {
+    explicit TreeNode(int _value) : value(_value) {}
     int value = 0;
     TreeNode *left = nullptr;
     TreeNode *right = nullptr;
-
-    TreeNode(int _value, TreeNode *_parent) {
-        value = _value;
-    }
 };
 
 class Tree {
@@ -67,19 +64,19 @@ void Tree::Print() {
 void Tree::Add(int value) {
     TreeNode *local_node = root;
     if (!local_node) {
-        root = new TreeNode(value, nullptr);
+        root = new TreeNode(value);
         return;
     }
     while (true) {
         if (value < local_node->value) {
             if (!(local_node->left)) {
-                local_node->left = new TreeNode(value, local_node);
+                local_node->left = new TreeNode(value);
                 return;
             }
             local_node = local_node->left;
         } else {
             if (!(local_node->right)) {
-                local_node->right = new TreeNode(value, local_node);
+                local_node->right = new TreeNode(value);
                 return;
             }
             local_node = local_node->right;
