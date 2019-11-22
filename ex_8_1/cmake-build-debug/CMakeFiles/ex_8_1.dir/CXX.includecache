@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_8_1/main.cpp
+assert.h
+-
+iostream
+-
+string
+-
+vector
+-
+cstring
+-
+

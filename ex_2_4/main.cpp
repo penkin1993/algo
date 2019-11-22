@@ -131,7 +131,6 @@ int main() {
     }
     std::cin >> heap.window_size;
 
-
     heap.window = new int_fast8_t[heap.window_size];
     heap.memory = new int_fast8_t[heap.window_size];
     int res[heap.buffer_size + heap.window_size - 1];

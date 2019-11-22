@@ -13,8 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ecd4c9db-0fdd-49fb-9b04-8e7907339a2e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ex_1_2.dir/main.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ex_1_2.dir/main.cpp.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/ex_1_2" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/ex_1_2" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -100,6 +98,7 @@
       <workItem from="1573189023426" duration="722000" />
       <workItem from="1573192820609" duration="700000" />
       <workItem from="1573196515032" duration="638000" />
+      <workItem from="1574386984283" duration="930000" />
     </task>
     <servers />
   </component>
