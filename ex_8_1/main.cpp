@@ -30,10 +30,10 @@ g(k, i)=g(k, i-1) + i (mod m). m - степень двойки.
 #include <assert.h>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <cstring>
 
 class HashTable {
+
 public:
     explicit HashTable(size_t initial_size);
 
@@ -63,16 +63,13 @@ private:
     struct HashTableNode {
         HashTableNode() = default;
 
-        std::string key = "NULL";
+        std::string key = " ";
         bool is_filled = false;
-
-        //explicit HashTableNode(std::string key_) : key(std::move(key_)) {} // TODO !!!!!
     };
 
     HashTableNode *table = nullptr;
-    int capacity = 0;
+    int capacity;
     int size = 0;
-    //std::vector<HashTableNode*> table;
 };
 
 HashTable::HashTable(size_t initial_size) {
@@ -80,14 +77,16 @@ HashTable::HashTable(size_t initial_size) {
     capacity = initial_size;
 }
 
+
 HashTable::~HashTable() {
-    delete table;
+    delete[] table;
 }
+
 
 int HashTable::Hash(const char *str, int m) { // хэш
     int hash = 0;
     for (; *str != 0; ++str)
-        hash = (hash * 193 + *str) % m;
+        hash = (hash * 41 + *str) % m;
     return hash;
 }
 
@@ -122,7 +121,7 @@ bool HashTable::Remove(const std::string &key) {
 
     for (int i = 0; i < capacity; i++) {
         if (table[hash_index].key == key) {
-            table[hash_index].key = "NULL";
+            table[hash_index].key = " ";
             size--;
             return true;
 
@@ -136,7 +135,6 @@ bool HashTable::Remove(const std::string &key) {
 
 bool HashTable::Add(const std::string &key) {
     assert(!key.empty());
-
     char cstr[key.length() + 1];
     strcpy(cstr, key.c_str()); // приведение строки к массиву
     int hash_index = Hash(cstr, capacity); // первоначальный хэш
@@ -144,16 +142,18 @@ bool HashTable::Add(const std::string &key) {
     int *add_index = nullptr;
 
     for (int i = 0; i < capacity; i++) {
+
         if (table[hash_index].key == key) {
             return false;
+        }
+        if ((table[hash_index].key == " ") && table[hash_index].is_filled) {
 
-        } else if ((table[hash_index].key == "NULL") && !table[hash_index].is_filled) {
             add_index = &hash_index;
-        } else {
+        } else if (!table[hash_index].is_filled) {
             if (add_index == nullptr) {
                 add_index = &hash_index;
             }
-            table[hash_index].key = key;
+            table[*add_index].key = key;
             table->is_filled = true;
             size++;
             Expand();
@@ -165,7 +165,7 @@ bool HashTable::Add(const std::string &key) {
 }
 
 void HashTable::Expand() {
-    if (size > 3 / 4 * capacity) {
+    if (size > (capacity * 3 / 4)) {
         int new_capacity = 2 * capacity;
         HashTableNode *oldtable = nullptr;
         oldtable = table;
@@ -174,72 +174,17 @@ void HashTable::Expand() {
         table = new HashTableNode[new_capacity];
 
         for (int i = 0; i < capacity; i++) {
-            if (oldtable[i].key != "NULL") {
+            if (oldtable[i].key != " ") {
                 Add(table[i].key);
             }
         }
         capacity = new_capacity;
-        delete oldtable;
+        delete [] oldtable;
     }
 }
-
-
-/*
-
-bool HashTable::Has(const std::string& key) const {
-    assert(!key.empty());
-
-    const size_t hash = key[0] % table.size();
-    for (auto head = table[hash]; head != nullptr; head = head->next) {
-        if (head->key == key) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool HashTable::Add(const std::string& key) {
-    assert(!key.empty());
-
-    const size_t hash = key[0] % table.size();
-    for (auto head = table[hash]; head != nullptr; head = head->next) {
-        if (head->key == key) {
-            return false;
-        }
-    }
-    HashTableNode* new_node = new HashTableNode(key);
-    new_node->next = table[hash];
-    table[hash] = new_node;
-    return true;
-}
-
-bool HashTable::Remove(const std::string& key) {
-    assert(!key.empty());
-
-    const size_t hash = key[0] % table.size();
-    HashTableNode*& head = table[hash];
-    if (!head) return false;
-    if (head->key == key) {
-        HashTableNode* to_delete = head;
-        head = head->next;
-        delete to_delete;
-        return true;
-    }
-    HashTableNode* parent = head;
-    for (; parent->next != nullptr; parent = parent->next) {
-        if (parent->next->key == key) {
-            HashTableNode* to_delete = parent->next;
-            parent->next = parent->next->next;
-            delete to_delete;
-            return true;
-        }
-    }
-    return false;
-}
- */
 
 int main() {
-    HashTable table(32);
+    HashTable table(64);
     char command = ' ';
     std::string value;
     while (std::cin >> command >> value) {
@@ -257,5 +202,5 @@ int main() {
     }
     return 0;
 }
-// TODO const auto & && table
+
 
