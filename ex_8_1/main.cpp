@@ -63,7 +63,7 @@ private:
     struct HashTableNode {
         HashTableNode() = default;
 
-        std::string key = " ";
+        std::string key = "__NULL__";
         bool is_filled = false;
     };
 
@@ -121,7 +121,7 @@ bool HashTable::Remove(const std::string &key) {
 
     for (int i = 0; i < capacity; i++) {
         if (table[hash_index].key == key) {
-            table[hash_index].key = " ";
+            table[hash_index].key = "__NULL__";
             size--;
             return true;
 
@@ -146,7 +146,7 @@ bool HashTable::Add(const std::string &key) {
         if (table[hash_index].key == key) {
             return false;
         }
-        if ((table[hash_index].key == " ") && table[hash_index].is_filled) {
+        if ((table[hash_index].key == "__NULL__") && table[hash_index].is_filled) {
 
             add_index = &hash_index;
         } else if (!table[hash_index].is_filled) {
@@ -174,7 +174,7 @@ void HashTable::Expand() {
         table = new HashTableNode[new_capacity];
 
         for (int i = 0; i < capacity; i++) {
-            if (oldtable[i].key != " ") {
+            if (oldtable[i].key != "__NULL__") {
                 Add(table[i].key);
             }
         }
