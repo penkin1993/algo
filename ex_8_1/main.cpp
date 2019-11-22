@@ -45,8 +45,14 @@ public:
 
     bool Remove(const std::string &key);
 
+    HashTable(const HashTable &) = delete;
 
+    HashTable(HashTable &&) = delete;
 
+    HashTable &operator=(const HashTable &) = delete;
+
+    HashTable &operator=(HashTable &&) = delete;
+    
 private:
     struct HashTableNode {
         HashTableNode() = default;
@@ -64,14 +70,6 @@ private:
     static int HashProba(int hash_index, int i, int m);
 
     void Expand();
-
-    HashTable(const HashTable &) = delete;
-
-    HashTable(HashTable &&) = delete;
-
-    HashTable &operator=(const HashTable &) = delete;
-
-    HashTable &operator=(HashTable &&) = delete;
 };
 
 HashTable::HashTable(size_t initial_size) {
