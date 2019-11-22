@@ -122,7 +122,7 @@ bool HashTable::Remove(const std::string &key) {
     for (int i = 0; i < capacity; i++) {
         if (table[hash_index].key == key) {
             table[hash_index].key = "__NULL__";
-            size--;
+            size++;
             return true;
 
         } else if (!table[hash_index].is_filled) {
@@ -142,19 +142,19 @@ bool HashTable::Add(const std::string &key) {
     int *add_index = nullptr;
 
     for (int i = 0; i < capacity; i++) {
-
         if (table[hash_index].key == key) {
             return false;
         }
         if ((table[hash_index].key == "__NULL__") && table[hash_index].is_filled) {
-
             add_index = &hash_index;
+
         } else if (!table[hash_index].is_filled) {
             if (add_index == nullptr) {
                 add_index = &hash_index;
             }
+
             table[*add_index].key = key;
-            table->is_filled = true;
+            table[*add_index].is_filled = true;
             size++;
             Expand();
             return true;
@@ -166,22 +166,27 @@ bool HashTable::Add(const std::string &key) {
 
 void HashTable::Expand() {
     if (size > (capacity * 3 / 4)) {
-        int new_capacity = 2 * capacity;
+        size = 0;
+
+        int old_capacity = capacity;
+        capacity *= 2;
+
         HashTableNode *oldtable = nullptr;
         oldtable = table;
 
         table = nullptr;
-        table = new HashTableNode[new_capacity];
+        table = new HashTableNode[capacity];
 
-        for (int i = 0; i < capacity; i++) {
+
+        for (int i = 0; i < old_capacity; i++) {
             if (oldtable[i].key != "__NULL__") {
-                Add(table[i].key);
+                Add(oldtable[i].key);
             }
         }
-        capacity = new_capacity;
-        delete [] oldtable;
+        delete[] oldtable;
     }
 }
+
 
 int main() {
     HashTable table(64);
@@ -202,5 +207,6 @@ int main() {
     }
     return 0;
 }
+
 
 
