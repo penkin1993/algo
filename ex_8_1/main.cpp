@@ -39,25 +39,13 @@ public:
 
     ~HashTable();
 
-    HashTable(const HashTable &) = delete;
-
-    HashTable(HashTable &&) = delete;
-
-    HashTable &operator=(const HashTable &) = delete;
-
-    HashTable &operator=(HashTable &&) = delete;
-
     bool Has(const std::string &key) const;
 
     bool Add(const std::string &key);
 
     bool Remove(const std::string &key);
 
-    static int Hash(const char *str, int m);
 
-    static int HashProba(int hash_index, int i, int m);
-
-    void Expand();
 
 private:
     struct HashTableNode {
@@ -70,6 +58,20 @@ private:
     HashTableNode *table = nullptr;
     int capacity;
     int size = 0;
+
+    static int Hash(const char *str, int m);
+
+    static int HashProba(int hash_index, int i, int m);
+
+    void Expand();
+
+    HashTable(const HashTable &) = delete;
+
+    HashTable(HashTable &&) = delete;
+
+    HashTable &operator=(const HashTable &) = delete;
+
+    HashTable &operator=(HashTable &&) = delete;
 };
 
 HashTable::HashTable(size_t initial_size) {
