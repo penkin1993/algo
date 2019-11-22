@@ -52,7 +52,7 @@ public:
     HashTable &operator=(const HashTable &) = delete;
 
     HashTable &operator=(HashTable &&) = delete;
-    
+
 private:
     struct HashTableNode {
         HashTableNode() = default;
@@ -189,7 +189,7 @@ void HashTable::Expand() {
 
 
 int main() {
-    HashTable table(64);
+    HashTable table(8);
     char command = ' ';
     std::string value;
     while (std::cin >> command >> value) {
@@ -207,6 +207,4 @@ int main() {
     }
     return 0;
 }
-
-
 
