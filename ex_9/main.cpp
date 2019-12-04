@@ -53,7 +53,7 @@ std::vector<unsigned char> BitsWriter::GetResult() {
 
 
 struct Node {
-    int weight; // TODO: Добавить новый вес !!!
+    int weight;
     byte symbol = '\0';
     Node *left = nullptr;
     Node *right = nullptr;
@@ -99,6 +99,7 @@ Node* get_tree(std::priority_queue<Node*, std::vector<Node*>, CompareWeight> & q
         queue.pop();
 
         Node* new_node = new Node(node_1->weight + node_2->weight, '\0', node_1, node_2);
+
         queue.push(new_node);
     }
 
@@ -108,25 +109,41 @@ Node* get_tree(std::priority_queue<Node*, std::vector<Node*>, CompareWeight> & q
     return new_node_;
 }
 
-void get_map(Node* root, std::map<byte, std::vector<int>> & map_symbols, std::vector<int> acc) {
+void get_map(Node* root, std::map<byte,
+        std::vector<int>> & map_symbols,
+        std::vector<int> acc,
+        std::deque<int> & tree_structure,
+        std::deque<byte> & symbol_deque) {
+        // 0 -- идти вниз. по дефолту влево. Если до подъема ходили налево, то направо
+        // 1 -- идти наверх ???
+        // определять по push_back ???
+
     if (root->symbol != '\0'){
-        /*
+        /////////////////////////////////////
         for (int i = 0; i < acc.size(); i++){
             std::cout << acc[i] << " ";
         }
         std::cout << root-> symbol << "\n";
-        */
+        /////////////////////////////////////
+        symbol_deque.push_back(root -> symbol);
+        // TODO: добавлять symbol в очередь !!!
 
         map_symbols.insert({root->symbol, acc});
+        tree_structure.push_back(1); // поднимаемся выше
     }
     else{
+
         acc.push_back(0);
-        get_map(root->left, map_symbols, acc);
+        tree_structure.push_back(0); // опускаамся влево
+        get_map(root->left, map_symbols, acc, tree_structure, symbol_deque);
 
         acc.pop_back();
         acc.push_back(1);
 
-        get_map(root->right, map_symbols, acc);
+        tree_structure.push_back(0); // опускаемся вправо
+        get_map(root->right, map_symbols, acc, tree_structure, symbol_deque);
+
+        tree_structure.push_back(1); // поднимаемся выше
     }
 }
 
@@ -141,20 +158,33 @@ void Encode(std::deque<byte> &original, std::vector<byte> &compressed) {
     Node* root_node = get_tree(q); // дерево Хаффмана
     std::map<byte, std::vector<int>> map_symbols; // Хэш таблица для кодирования. Символ и вектор из 0 и 1
     std::vector<int> acc;
+    std::deque<int> tree_structure; // вектор для хранения структуры дерева
+    std::deque<byte> symbol_deque;
 
-    get_map(root_node, map_symbols, acc);
+    get_map(root_node, map_symbols, acc, tree_structure, symbol_deque); // TODO: Лишняя единица !!!
 
     BitsWriter bits_writer;
 
     while (!original.empty()){
-        symbol = original.back();
+        symbol = original.front();
         original.pop_front();
         code = map_symbols.find(symbol)->second;
+
+        std::cout << symbol << " ";
         for (int i = 0; i < code.size(); i++){
             bits_writer.WriteBit(code[i]);
         }
     }
-    // TODO: Записывать в compressed. Придерживаться интерфейса !!!
+
+    //////////////////////////////////////////////////
+    std::cout << "\n|";
+    for (int i = 0; i < tree_structure.size(); i++){
+        std::cout << tree_structure[i];
+    }
+    std::cout << "|\n";
+    //////////////////////////////////////////////////
+
+    // TODO: придерживаься интерфейса
     // TODO: добавить пары (символ, значение) и n
 
 
