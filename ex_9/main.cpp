@@ -68,7 +68,7 @@ struct CompareWeight {
     }
 };
 
-std::priority_queue<Node*, std::vector<Node*>, CompareWeight> get_queue(std::vector<byte> & input) {
+std::priority_queue<Node*, std::vector<Node*>, CompareWeight> get_queue(std::deque<byte> & input) {
     std::map<byte, int> freq;
 
     // заполняем список
@@ -132,7 +132,7 @@ void get_map(Node* root, std::map<byte, std::vector<int>> & map_symbols, std::ve
 
 // TODO: Функция кодирования сообщения !!!
 // TODO: добавлять в хвост сами символы и соответствующее их число !!!
-void Encode(std::vector<byte> &original, std::vector<byte> &compressed) {
+void Encode(std::deque<byte> &original, std::vector<byte> &compressed) {
     byte symbol;
     std::vector<int> code;
 
@@ -148,7 +148,7 @@ void Encode(std::vector<byte> &original, std::vector<byte> &compressed) {
 
     while (!original.empty()){
         symbol = original.back();
-        original.pop_back();
+        original.pop_front();
         code = map_symbols.find(symbol)->second;
         for (int i = 0; i < code.size(); i++){
             bits_writer.WriteBit(code[i]);
@@ -185,7 +185,7 @@ void Encode(std::vector<byte> &original, std::vector<byte> &compressed) {
 
 
 int main() {
-    std::vector<byte> input;
+    std::deque<byte> input;
     std::map<byte, int> count;
     std::ifstream file;
 
