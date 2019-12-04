@@ -11,7 +11,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bc1e90b4-2529-41d6-8c90-4f9756ea3240" name="Default Changelist" comment="" />
+    <list default="true" id="bc1e90b4-2529-41d6-8c90-4f9756ea3240" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ex_2_4/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_2_4/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ex_9/cmake-build-debug/CMakeFiles/ex_9.dir/depend.make" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_9/cmake-build-debug/CMakeFiles/ex_9.dir/depend.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ex_9/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_9/main.cpp" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +76,8 @@
       <workItem from="1573220681391" duration="1947000" />
       <workItem from="1573234746277" duration="233000" />
       <workItem from="1573242868789" duration="2018000" />
+      <workItem from="1575130891337" duration="1249000" />
+      <workItem from="1575151870244" duration="338000" />
     </task>
     <servers />
   </component>

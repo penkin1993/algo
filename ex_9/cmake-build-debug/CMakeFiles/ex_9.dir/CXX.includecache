@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_9/main.cpp
+iostream
+-
+vector
+-
+fstream
+-
+zconf.h
+-
+queue
+-
+map
+-
+functional
+-
+cstring
+-
+iostream
+-
+vector
+-
+
