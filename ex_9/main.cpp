@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include <zconf.h>
 #include <queue>
 #include <map>
 #include <functional>
@@ -11,6 +10,7 @@ typedef unsigned char byte;
 class BitsWriter {
 public:
     void WriteBit(bool bit);
+
     void WriteByte(unsigned char byte);
 
     std::vector<unsigned char> GetResult(bool add_len);
@@ -44,13 +44,25 @@ void BitsWriter::WriteByte(unsigned char byte) {
 
 std::vector<unsigned char> BitsWriter::GetResult(bool add_len) {
     if (bits_count_ != 0) {
-        // Добавляем в буфер аккумулятор, если в нем что-то есть.
+        // Добавляем в буфер аккумулятор, если в нем что-то есть. Все правильно. Сколько ЗНАЧАЩИХ
         buffer_.push_back(accumulator_);
     }
-    if (add_len){
+    //std::cout << "bits_count_ " << bits_count_ << "\n";
+
+    if (add_len) {
         buffer_.push_back(static_cast<unsigned char>(bits_count_));
+        //bits_count_ = 0;
+        //return buffer_; //std::move(buffer_);
     }
-    return std::move(buffer_);
+    accumulator_ = 0;
+    bits_count_ = 0;
+
+    if (add_len){
+        return buffer_;
+    }
+    else{
+        return std::move(buffer_);
+    }
 }
 
 
@@ -64,13 +76,14 @@ struct Node {
             : weight(weight_), symbol(symbol_), left(left_), right(right_) {
     }
 };
+
 struct CompareWeight {
     bool operator()(Node *const &p1, Node *const &p2) {
         return p1->weight > p2->weight;
     }
 };
 
-std::priority_queue<Node*, std::vector<Node*>, CompareWeight> get_queue(std::deque<byte> & input) {
+std::priority_queue<Node *, std::vector<Node *>, CompareWeight> get_queue(std::deque<byte> &input) {
     std::map<byte, int> freq;
 
     // заполняем список
@@ -81,7 +94,7 @@ std::priority_queue<Node*, std::vector<Node*>, CompareWeight> get_queue(std::deq
             ++freq[c];
     }
 
-    std::priority_queue<Node*, std::vector<Node*>, CompareWeight> q;
+    std::priority_queue<Node *, std::vector<Node *>, CompareWeight> q;
 
     for (std::pair<byte, int> pair: freq) {
         q.push(new Node(pair.second, pair.first, nullptr, nullptr));
@@ -89,50 +102,49 @@ std::priority_queue<Node*, std::vector<Node*>, CompareWeight> get_queue(std::deq
     return q;
 }
 
-Node* get_tree(std::priority_queue<Node*, std::vector<Node*>, CompareWeight> & queue) {
+Node *get_tree(std::priority_queue<Node *, std::vector<Node *>, CompareWeight> &queue) {
     if (queue.empty()) {
         return nullptr;
     }
     while (queue.size() > 1) {
-        Node* node_1 = queue.top();
+        Node *node_1 = queue.top();
         queue.pop();
 
-        Node* node_2 = queue.top();
+        Node *node_2 = queue.top();
         queue.pop();
 
-        Node* new_node = new Node(node_1->weight + node_2->weight, '\0', node_1, node_2);
+        Node *new_node = new Node(node_1->weight + node_2->weight, '\0', node_1, node_2);
 
         queue.push(new_node);
     }
 
-    Node* new_node_ = queue.top();
+    Node *new_node_ = queue.top();
     queue.pop();
 
     return new_node_;
 }
 
-void get_map(Node* root, std::map<byte,
-        std::vector<int>> & map_symbols,
-        std::vector<int> acc,
-        std::deque<int> & tree_structure,
-        std::deque<byte> & symbol_deque) {
-        // 0 -- идти вниз. по дефолту влево. Если до подъема ходили налево, то направо
-        // 1 -- идти наверх ???
-        // определять по push_back ???
+void get_map(Node *root, std::map<byte,
+        std::vector<int>> &map_symbols,
+             std::vector<int> acc,
+             std::deque<int> &tree_structure,
+             std::deque<byte> &symbol_deque) {
+    // 0 -- идти вниз. по дефолту влево. Если до подъема ходили налево, то направо
+    // 1 -- идти наверх ???
+    // определять по push_back ???
 
-    if (root->symbol != '\0'){
+    if (root->symbol != '\0') {
         /////////////////////////////////////
-        for (int i = 0; i < acc.size(); i++){
+        for (int i = 0; i < acc.size(); i++) {
             std::cout << acc[i] << " ";
         }
-        std::cout << root-> symbol << "\n";
+        std::cout << root->symbol << "\n";
         /////////////////////////////////////
-        symbol_deque.push_back(root -> symbol);
+        symbol_deque.push_back(root->symbol);
 
         map_symbols.insert({root->symbol, acc});
         tree_structure.push_back(1); // поднимаемся выше
-    }
-    else{
+    } else {
 
         acc.push_back(0);
         tree_structure.push_back(0); // опускаамся влево
@@ -148,65 +160,76 @@ void get_map(Node* root, std::map<byte,
     }
 }
 
-std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> & map_symbols, std::deque<byte> & original,
-                                  std::deque<int> & tree_structure, std::deque<byte> & symbol_deque){
+std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_symbols, std::deque<byte> &original,
+                                  std::deque<int> &tree_structure, std::deque<byte> &symbol_deque) {
     byte symbol;
     bool bit;
     std::vector<int> code;
     BitsWriter bits_writer;
 
-    // сообщение, байт(сколько в последнем байте фиктивно) | дерево, байт(сколько фиктивно в дереве), байт(длина дерева) | словарь(порядок дерева), байт(длина словаря)
+    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево, байт(сколько не фиктивно в дереве), байт(длина дерева) |
+    // словарь(порядок дерева), байт(длина словаря)
 
-    while (!original.empty()){ // сообщение
+    while (!original.empty()) { // сообщение
         symbol = original.front();
         original.pop_front();
         code = map_symbols.find(symbol)->second;
-
-        /*
-        std::cout << symbol << " ";
-
-        for (int i = 0; i < code.size(); i++){
-            std::cout << code[i];
+        //std::cout << symbol << " ";
+        for (int i = 0; i < code.size(); i++) {
+            //std::cout << code[i];
             bits_writer.WriteBit(code[i]);
         }
-        std::cout << "\n";
-         */
+        //std::cout << "\n";
     }
-
-    bits_writer.GetResult(true); //  байт(сколько в последнем байте фиктивно) //
+    bits_writer.GetResult(true); //  байт(сколько в последнем байте не фиктивно) //
 
     int tree_len = tree_structure.size();
-    while (!tree_structure.empty()){ // дерево
+    while (!tree_structure.empty()) { // дерево
         bit = tree_structure.front();
+        //std::cout <<" bit "<< bit << "\n";
         tree_structure.pop_front();
         bits_writer.WriteBit(bit);
     }
 
-    bits_writer.GetResult(true); // байт(сколько фиктивно в дереве)
+    bits_writer.GetResult(true); // байт(сколько не фиктивно в дереве)
     bits_writer.WriteByte(tree_len); // байт(длина дерева)
 
     int symbol_deque_len = symbol_deque.size();
-    while (!symbol_deque.empty()){ // словарь(порядок дерева)
-        bit = symbol_deque.front();
+
+    //std::cout << "symbol_deque_len " <<  symbol_deque_len << "\n";
+    //std::cout << "symbol_deque " <<  symbol_deque[0] << "\n";
+    //std::cout << "symbol_deque " <<  symbol_deque[1] << "\n";
+
+    while (!symbol_deque.empty()) { // словарь(порядок дерева)
+        symbol = symbol_deque.front();
         symbol_deque.pop_front();
-        bits_writer.WriteBit(bit);
+        bits_writer.WriteByte(symbol);
     }
-    bits_writer.WriteByte(symbol_deque_len);
+
+    //bits_writer.GetResult(false);
+    bits_writer.WriteByte(symbol_deque_len);  // длина массива
 
     std::vector<unsigned char> result =
             std::move(bits_writer.GetResult(false));
 
-    return result;
-
     /*
     std::cout << "USSR ";
-    byte a = 2;
+    byte a = 'a';
     for (int i = 0; i < 8; ++i) {
         std::cout << ((a >> i) & 1);
     }
     std::cout << " USSR ";
 
 
+    for (unsigned char byte : result) {
+        for (int i = 0; i < 8; ++i) {
+            std::cout << ((byte >> i) & 1);
+        }
+        std::cout << " ";
+    }
+*/
+    //result = std::move(bits_writer.GetResult(false));
+     /*
     std::vector<unsigned char> result =
             std::move(bits_writer.GetResult());
 
@@ -216,14 +239,17 @@ std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> & map_s
         }
         std::cout << " ";
     }
-    */
+*/
+
+    return result;
 }
 
 void Encode(std::deque<byte> &original, std::vector<byte> &compressed) {
 
-    std::priority_queue<Node*, std::vector<Node*>, CompareWeight> q = get_queue(original); // очередь для построения дерева Хаффмана
+    std::priority_queue<Node *, std::vector<Node *>, CompareWeight> q = get_queue(
+            original); // очередь для построения дерева Хаффмана
 
-    Node* root_node = get_tree(q); // дерево Хаффмана
+    Node *root_node = get_tree(q); // дерево Хаффмана
     std::map<byte, std::vector<int>> map_symbols; // Хэш таблица для кодирования. Символ и вектор из 0 и 1
     std::vector<int> acc;
     std::deque<int> tree_structure; // вектор для хранения структуры дерева
@@ -247,30 +273,34 @@ void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
     // сообщение, байт(сколько в последнем байте фиктивно) | дерево, байт(сколько фиктивно в дереве), байт(длина дерева)
     // | словарь(порядок дерева), байт(длина словаря)
 
-    // TODO: Какой тип данных ???
+    int symbol_deque_len = compressed.back(); //  байт(длина словаря)
+    compressed.pop_back();
 
 
+
+
+
+
+
+
+
+    for (unsigned char byte : compressed) {
+        for (int i = 0; i < 8; ++i) {
+            std::cout << ((byte >> i) & 1);
+        }
+        std::cout << " ";
+    }
+    std::cout << "\n";
+
+    std::cout << "symbol_deque_len "<< symbol_deque_len;
+    //std::cout << "symbol_deque_len "<< compressed.size();
 
 
     // TODO Обратная операция к кодированию ???
 
 
-
-
-    // TODO: Tree reconstruct
-
-
-
-
-
-
-
-
-
-
+    // TODO: Tree reconstruct. В отдельный метод
 }
-
-
 
 
 int main() {
