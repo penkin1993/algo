@@ -4,6 +4,7 @@
 #include <queue>
 #include <map>
 #include <functional>
+#include "Huffman.h"
 
 typedef unsigned char byte;
 
@@ -197,8 +198,8 @@ void get_map(Node *root, std::map<byte,
     }
 }
 
-std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_symbols, std::vector<byte> &original,
-                                  std::vector<int> &tree_structure, std::vector<byte> &symbol_stack) {
+void encode(const std::map<byte, std::vector<int>> &map_symbols, std::vector<byte> &original,
+                                  std::vector<int> &tree_structure, std::vector<byte> &symbol_stack, IOutputStream & compressed) {
     byte symbol;
     bool bit;
     std::vector<int> code;
@@ -256,6 +257,14 @@ std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_sy
     std::vector<unsigned char> result =
             std::move(bits_writer.GetResult(false));
 
+    for (unsigned char value : result)
+    {
+        compressed.Write(value);
+    }
+    while(!result.empty()){
+        result.pop_back();
+    }
+
     /*
     std::cout << "USSR ";
     byte a = 'a';
@@ -285,13 +294,18 @@ std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_sy
     }
 */
 
-    return result;
 }
 
-void Encode(std::vector<byte> &original, std::vector<byte> &compressed) {
+void Encode(IInputStream& original, IOutputStream& compressed){
+    std::vector<byte> original_;
+    byte value;
+    while (original.Read(value))
+    {
+        original_.push_back(value);
+    }
 
     std::priority_queue<Node *, std::vector<Node *>, CompareWeight> q = get_queue(
-            original); // очередь для построения дерева Хаффмана
+            original_); // очередь для построения дерева Хаффмана
 
     Node *root_node = get_tree(q); // дерево Хаффмана
     std::map<byte, std::vector<int>> map_symbols; // Хэш таблица для кодирования. Символ и вектор из 0 и 1
@@ -302,7 +316,7 @@ void Encode(std::vector<byte> &original, std::vector<byte> &compressed) {
     get_map(root_node, map_symbols, acc, tree_structure, symbol_stack);
     tree_structure.pop_back(); // Убрали лишний символ
 
-    compressed = encode(map_symbols, original, tree_structure, symbol_stack);
+    encode(map_symbols, original_, tree_structure, symbol_stack, compressed);
     /*/////////////////////////////////////////////////
     std::cout << "\n|";
     for (int i = 0; i < tree_structure.size(); i++){
@@ -410,7 +424,7 @@ SimpleNode * tree_reconstruct(std::deque<byte> & symbol_deque, std::deque<int> &
     return root;
 }
 
-void original_reconstruct(SimpleNode & root, std::vector<int> & sequence, std::deque<byte> &original){
+void original_reconstruct(SimpleNode & root, std::vector<int> & sequence, IOutputStream& original){
     int path = 0;
     SimpleNode * current = &root;
     while (!sequence.empty()){
@@ -424,21 +438,28 @@ void original_reconstruct(SimpleNode & root, std::vector<int> & sequence, std::d
             current = current->right;
         }
         if (current->symbol != '\0'){
-            original.push_front(current->symbol);
+            original.Write(current->symbol);
             current = &root;
         }
     }
 }
 
-void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
+void Decode(IInputStream& compressed, IOutputStream& original){
+//void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
     // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  байт(длина дерева)
     // | словарь(порядок дерева), байт(длина словаря)
+    std::vector<byte> compressed_;
+    byte value;
+    while (compressed.Read(value))
+    {
+        compressed_.push_back(value);
+    }
 
     std::deque<byte> symbol_deque;
     std::deque<int> tree_structure; // дерево
     std::vector<int> sequence; // сообщение
 
-    decode(compressed, symbol_deque, tree_structure, sequence);
+    decode(compressed_, symbol_deque, tree_structure, sequence);
     SimpleNode * root = tree_reconstruct(symbol_deque, tree_structure);
 
     std::cout << "\n";
@@ -448,10 +469,13 @@ void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
 
     original_reconstruct(*root, sequence, original);
 
+
+    /*
     std::cout << "\n";
     for (int i = 0; i < original.size(); i++){
         std::cout << original[i];
     }
+     */
 
 
     /*
@@ -470,18 +494,7 @@ void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+/*
 int main() {
     std::vector<byte> input;
     std::deque<byte> output;
@@ -509,6 +522,7 @@ int main() {
     //    std::cout << input[i] << " ";
     //}
 
+ */
     /*
     std::priority_queue<Node*, std::vector<Node*>, CompareWeight> q = get_queue(input); // очередь для построения дерева Хаффмана
 
@@ -526,173 +540,10 @@ int main() {
     //{
     //    std::cout << elem.first  << "  "<< elem.second.size()  << "\n";
     //}
-
+/*
     return 0;
 };
-
-
-
-
-
-
-
-
-
+*/
 
 
 //std::cout << map_symbols.find(input[0])->first <<" "<< input[0] << " USSR";
-/*
-
-int main() {
-    BitsWriter bits_writer;
-
-    //bits_writer.WriteBit(true);
-    //bits_writer.WriteBit(false);
-    bits_writer.WriteByte(0);
-    bits_writer.WriteByte('1');
-    bits_writer.WriteByte('a');
-    bits_writer.WriteByte('b');
-
-    bits_writer.WriteBit(false);
-    bits_writer.WriteBit(true);
-    bits_writer.WriteBit(false);
-    bits_writer.WriteBit(false);
-    bits_writer.WriteBit(false);
-    bits_writer.WriteBit(false);
-    bits_writer.WriteByte(0xFE);
-    bits_writer.WriteBit(true);
-    bits_writer.WriteBit(false);
-
-    std::vector<unsigned char> result =
-            std::move(bits_writer.GetResult());
-
-    for (unsigned char byte : result) {
-        for (int i = 0; i < 8; ++i) {
-            std::cout << ((byte >> i) & 1);
-        }
-        std::cout << " ";
-    }
-    return 0;
-}
-*/
-
-
-
-
-
-/*
-#include <cstring>
-#include <iostream>
-#include <vector>
-//#include "Huffman.h"
-​
-std::vector<byte> ToVector(IInputStream& input)
-{
-    std::vector<byte> vec;
-    byte value;
-    while (input.Read(value))
-    {
-        vec.push_back(value);
-    }
-    return vec;
-}
-​
-void FromVector(const std::vector<byte>& vec, IOutputStream& output)
-{
-    for (const byte& value: vec)
-    {
-        output.Write(value);
-    }
-}
-​
-void Encode(IInputStream& original, IOutputStream& compressed)
-{
-    std::vector<byte> temp = ToVector(original);
-    FromVector(temp, compressed);
-}
-​
-void Decode(IInputStream& compressed, IOutputStream& original)
-{
-    std::vector<byte> temp = ToVector(compressed);
-    FromVector(temp, original);
-}
-
-
-
-
-//#include "Huffman.h"
-
-struct IInputStream {
-    // Возвращает false, если поток закончился
-    bool virtual Read(byte &value) = 0;
-};
-
-struct IOutputStream {
-    void virtual Write(byte value) = 0;
-};
-
-
-struct MyInputStream : public IInputStream {
-    // Возвращает false, если поток закончился
-    MyInputStream();
-
-    bool Read(byte &value);
-};
-
-struct MyOutputStream : public IOutputStream {
-    MyOutputStream();
-
-    void Write(byte value);
-};
-
-
-MyInputStream::MyInputStream() {
-    freopen(NULL, "rb", stdin);
-}
-
-bool MyInputStream::Read(byte &value) {
-    int c = getc(stdin);
-    bool res = c != EOF;
-    value = c;
-    return res;
-}
-
-MyOutputStream::MyOutputStream() {
-    freopen(NULL, "wb", stdout);
-}
-
-void MyOutputStream::Write(byte value) {
-    putc(value, stdout);
-}
-
-
-// Метод архивирует данные из потока original
-void Encode(IInputStream &original, IOutputStream &compressed);
-
-
-// Метод восстанавливает оригинальные данные
-void Decode(IInputStream &compressed, IOutputStream &original);
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//#include "Huffman.h"
-
-static void copyStream(IInputStream &input, IOutputStream &output) {
-    byte value;
-    while (input.Read(value)) {
-        output.Write(value);
-    }
-}
-
-
-void Encode(IInputStream &original, IOutputStream &compressed) {
-    copyStream(original, compressed);
-}
-
-void Decode(IInputStream &compressed, IOutputStream &original) {
-    copyStream(compressed, original);
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-

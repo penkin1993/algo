@@ -6,6 +6,16 @@
 
 #IncludeRegexTransform: 
 
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_9/Huffman.h
+vector
+-
+iostream
+-
+fstream
+-
+string
+-
+
 /Users/grigorijpenkin/Documents/pr_a/algo/ex_9/main.cpp
 iostream
 -
@@ -19,10 +29,6 @@ map
 -
 functional
 -
-cstring
--
-iostream
--
-vector
--
+Huffman.h
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_9/Huffman.h
 
