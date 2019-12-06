@@ -57,14 +57,54 @@ std::vector<unsigned char> BitsWriter::GetResult(bool add_len) {
     accumulator_ = 0;
     bits_count_ = 0;
 
-    if (add_len){
-        return buffer_;
-    }
-    else{
-        return std::move(buffer_);
-    }
+    //if (add_len){
+    return buffer_;
+    //}
+    //else{
+    //    return std::move(buffer_);
+    //}
 }
 
+class BitsReader {
+public:
+    BitsReader(std::vector<byte> & buffer): buffer_(buffer){}
+    bool ReadBit();
+    byte ReadByte();
+    int size();
+    bool empty();
+private:
+    std::vector<byte> & buffer_;
+    byte symbol_ = 0;
+    int bits_count_ = '0';
+};
+
+bool BitsReader::empty(){
+    int size  = buffer_.size();
+    return size + bits_count_ < 0;
+}
+
+byte BitsReader::ReadByte() {
+    symbol_ = buffer_.back();
+    buffer_.pop_back();
+    return symbol_;
+}
+
+bool BitsReader::ReadBit(){
+    if (bits_count_ == '0'){ // инициализация TODO: ref !!!
+        bits_count_ = 7;
+        symbol_ = buffer_.back();
+        buffer_.pop_back();
+    }
+    if (bits_count_ < 0){
+        bits_count_ = 7;
+        symbol_ = buffer_.back();
+        buffer_.pop_back();
+    }
+    std::cout << "BC " << bits_count_ << "\n";
+    bool bit = (bool) ((symbol_ >> bits_count_) & 1);
+    bits_count_--;
+    return bit;
+}
 
 struct Node {
     int weight;
@@ -83,7 +123,7 @@ struct CompareWeight {
     }
 };
 
-std::priority_queue<Node *, std::vector<Node *>, CompareWeight> get_queue(std::deque<byte> &input) {
+std::priority_queue<Node *, std::vector<Node *>, CompareWeight> get_queue(std::vector<byte> &input) {
     std::map<byte, int> freq;
 
     // заполняем список
@@ -127,8 +167,8 @@ Node *get_tree(std::priority_queue<Node *, std::vector<Node *>, CompareWeight> &
 void get_map(Node *root, std::map<byte,
         std::vector<int>> &map_symbols,
              std::vector<int> acc,
-             std::deque<int> &tree_structure,
-             std::deque<byte> &symbol_deque) {
+             std::vector<int> &tree_structure,
+             std::vector<byte> &symbol_stack) {
     // 0 -- идти вниз. по дефолту влево. Если до подъема ходили налево, то направо
     // 1 -- идти наверх ???
     // определять по push_back ???
@@ -140,7 +180,7 @@ void get_map(Node *root, std::map<byte,
         }
         std::cout << root->symbol << "\n";
         /////////////////////////////////////
-        symbol_deque.push_back(root->symbol);
+        symbol_stack.push_back(root->symbol);
 
         map_symbols.insert({root->symbol, acc});
         tree_structure.push_back(1); // поднимаемся выше
@@ -148,31 +188,31 @@ void get_map(Node *root, std::map<byte,
 
         acc.push_back(0);
         tree_structure.push_back(0); // опускаамся влево
-        get_map(root->left, map_symbols, acc, tree_structure, symbol_deque);
+        get_map(root->left, map_symbols, acc, tree_structure, symbol_stack);
 
         acc.pop_back();
         acc.push_back(1);
 
         tree_structure.push_back(0); // опускаемся вправо
-        get_map(root->right, map_symbols, acc, tree_structure, symbol_deque);
+        get_map(root->right, map_symbols, acc, tree_structure, symbol_stack);
 
         tree_structure.push_back(1); // поднимаемся выше
     }
 }
 
-std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_symbols, std::deque<byte> &original,
-                                  std::deque<int> &tree_structure, std::deque<byte> &symbol_deque) {
+std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_symbols, std::vector<byte> &original,
+                                  std::vector<int> &tree_structure, std::vector<byte> &symbol_stack) {
     byte symbol;
     bool bit;
     std::vector<int> code;
     BitsWriter bits_writer;
 
-    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево, байт(сколько не фиктивно в дереве), байт(длина дерева) |
+    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  байт(длина дерева) |
     // словарь(порядок дерева), байт(длина словаря)
 
     while (!original.empty()) { // сообщение
-        symbol = original.front();
-        original.pop_front();
+        symbol = original.back();
+        original.pop_back();
         code = map_symbols.find(symbol)->second;
         //std::cout << symbol << " ";
         for (int i = 0; i < code.size(); i++) {
@@ -185,24 +225,24 @@ std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_sy
 
     int tree_len = tree_structure.size();
     while (!tree_structure.empty()) { // дерево
-        bit = tree_structure.front();
+        bit = tree_structure.back();
         //std::cout <<" bit "<< bit << "\n";
-        tree_structure.pop_front();
+        tree_structure.pop_back();
         bits_writer.WriteBit(bit);
     }
 
-    bits_writer.GetResult(true); // байт(сколько не фиктивно в дереве)
+    bits_writer.GetResult(false);
     bits_writer.WriteByte(tree_len); // байт(длина дерева)
 
-    int symbol_deque_len = symbol_deque.size();
+    int symbol_deque_len = symbol_stack.size();
 
     //std::cout << "symbol_deque_len " <<  symbol_deque_len << "\n";
     //std::cout << "symbol_deque " <<  symbol_deque[0] << "\n";
     //std::cout << "symbol_deque " <<  symbol_deque[1] << "\n";
 
-    while (!symbol_deque.empty()) { // словарь(порядок дерева)
-        symbol = symbol_deque.front();
-        symbol_deque.pop_front();
+    while (!symbol_stack.empty()) { // словарь(порядок дерева)
+        symbol = symbol_stack.back();
+        symbol_stack.pop_back();
         bits_writer.WriteByte(symbol);
     }
 
@@ -244,7 +284,7 @@ std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_sy
     return result;
 }
 
-void Encode(std::deque<byte> &original, std::vector<byte> &compressed) {
+void Encode(std::vector<byte> &original, std::vector<byte> &compressed) {
 
     std::priority_queue<Node *, std::vector<Node *>, CompareWeight> q = get_queue(
             original); // очередь для построения дерева Хаффмана
@@ -252,13 +292,13 @@ void Encode(std::deque<byte> &original, std::vector<byte> &compressed) {
     Node *root_node = get_tree(q); // дерево Хаффмана
     std::map<byte, std::vector<int>> map_symbols; // Хэш таблица для кодирования. Символ и вектор из 0 и 1
     std::vector<int> acc;
-    std::deque<int> tree_structure; // вектор для хранения структуры дерева
-    std::deque<byte> symbol_deque;
+    std::vector<int> tree_structure; // вектор для хранения структуры дерева
+    std::vector<byte> symbol_stack;
 
-    get_map(root_node, map_symbols, acc, tree_structure, symbol_deque);
+    get_map(root_node, map_symbols, acc, tree_structure, symbol_stack);
     tree_structure.pop_back(); // Убрали лишний символ
 
-    compressed = encode(map_symbols, original, tree_structure, symbol_deque);
+    compressed = encode(map_symbols, original, tree_structure, symbol_stack);
     /*/////////////////////////////////////////////////
     std::cout << "\n|";
     for (int i = 0; i < tree_structure.size(); i++){
@@ -270,41 +310,93 @@ void Encode(std::deque<byte> &original, std::vector<byte> &compressed) {
 
 
 void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
-    // сообщение, байт(сколько в последнем байте фиктивно) | дерево, байт(сколько фиктивно в дереве), байт(длина дерева)
+    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  байт(длина дерева)
     // | словарь(порядок дерева), байт(длина словаря)
+    byte symbol;
+    int bit;
+    BitsReader bitsReader = BitsReader(compressed);
 
-    int symbol_deque_len = compressed.back(); //  байт(длина словаря)
-    compressed.pop_back();
+    int symbol_deque_len = bitsReader.ReadByte(); //  байт(длина словаря)
 
+    std::vector<byte> symbol_stack;
+    for (int i = 0; i < symbol_deque_len; i++){ // словарь(порядок дерева)
+        symbol = bitsReader.ReadByte();
+        symbol_stack.push_back(symbol);
+    }
 
+    int tree_len = bitsReader.ReadByte(); // байт(длина дерева)
+    int pass_count_tree = 8 - tree_len % 8; // число фиктивных символов. Их надо пропустить
 
+    for (int i = 0; i < pass_count_tree; i++){  // пропускаем фиктивные символы
+        bitsReader.ReadBit();
+    }
 
+    std::vector<int> tree_structure; // дерево
+    for (int i = 0; i < tree_len; i++){
+        bit = bitsReader.ReadBit();
+        tree_structure.push_back(bit);
+    }
 
+    int pass_count_comp = 8 - bitsReader.ReadByte(); // сколько в последнем байте фиктивно
+    for (int i = 0; i < pass_count_comp; i++){  // пропускаем фиктивные символы
+        bitsReader.ReadBit();
+    }
 
+    std::vector<int> sequence; // сообщение
+    while (!bitsReader.empty()){
+        sequence.push_back(bitsReader.ReadBit());
+    }
 
-
-
-    for (unsigned char byte : compressed) {
-        for (int i = 0; i < 8; ++i) {
-            std::cout << ((byte >> i) & 1);
-        }
-        std::cout << " ";
+    std::cout << "symbol_deque_len " << symbol_deque_len << "\n";
+    for (int i = 0; i < symbol_deque_len; i++){
+        std::cout << symbol_stack[i];
     }
     std::cout << "\n";
+    std::cout << "tree_len " << tree_len << "\n";
+    std::cout << "pass_count " << pass_count_tree << "\n";
+    std::cout << "tree_structure ";
+    for (int i = 0; i < tree_len; i++){
+        std::cout << tree_structure[i];
+    }
+    std::cout << "\n";
+    std::cout << "pass_count_comp " << pass_count_comp << "\n";
+    for (int i = 0; i < sequence.size(); i++){
+        std::cout << sequence[i];
+    }
 
-    std::cout << "symbol_deque_len "<< symbol_deque_len;
+
+
+
+
+
+
+
+    // TODO: Check all !!!
+    // TODO: Tree reconstruct. В отдельный класс ???
+
+    /*
+     for (unsigned char byte : compressed) {
+    for (int i = 0; i < 8; ++i) {
+        std::cout << ((byte >> i) & 1);
+    }
+    std::cout << " ";
+    }
+    std::cout << "\n";
+    */
+
+    //std::cout << "symbol_deque_len "<< symbol_deque_len;
     //std::cout << "symbol_deque_len "<< compressed.size();
 
 
-    // TODO Обратная операция к кодированию ???
 
-
-    // TODO: Tree reconstruct. В отдельный метод
 }
 
 
+
+
+
 int main() {
-    std::deque<byte> input;
+    std::vector<byte> input;
     std::deque<byte> output;
     std::map<byte, int> count;
     std::ifstream file;
