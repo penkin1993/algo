@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/grigorijpenkin/Documents/pr_a/algo/ex__9/Htree.h
+vector
+-
+queue
+-
+map
+-
+functional
+-
+Huffman.h
+/Users/grigorijpenkin/Documents/pr_a/algo/ex__9/Huffman.h
+
+/Users/grigorijpenkin/Documents/pr_a/algo/ex__9/Huffman.h
+fstream
+-
+cstdio
+-
+
+/Users/grigorijpenkin/Documents/pr_a/algo/ex__9/main.cpp
+Htree.h
+/Users/grigorijpenkin/Documents/pr_a/algo/ex__9/Htree.h
+
