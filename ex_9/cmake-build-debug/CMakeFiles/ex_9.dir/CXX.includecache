@@ -17,11 +17,7 @@ string
 -
 
 /Users/grigorijpenkin/Documents/pr_a/algo/ex_9/main.cpp
-iostream
--
 vector
--
-fstream
 -
 queue
 -

@@ -80,7 +80,7 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/Users/grigorijpenkin/Documents/pr_a/algo/ex_9/main.cpp">
+		<Unit filename="/Users/grigorijpenkin/Documents/pr_a/algo/ex_9/Htree.h">
 			<Option target="ex_9"/>
 		</Unit>
 		<Unit filename="/Users/grigorijpenkin/Documents/pr_a/algo/ex_9/CMakeLists.txt">
