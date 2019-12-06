@@ -204,7 +204,7 @@ std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_sy
     std::vector<int> code;
     BitsWriter bits_writer;
 
-    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  байт(длина дерева) |
+    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  2байта(длина дерева) |
     // словарь(порядок дерева), байт(длина словаря)
 
     while (!original.empty()) { // сообщение
@@ -229,7 +229,14 @@ std::vector<unsigned char> encode(const std::map<byte, std::vector<int>> &map_sy
     }
 
     bits_writer.GetResult(false);
-    bits_writer.WriteByte(tree_len); // байт(длина дерева)
+    if (tree_len < 256){
+        bits_writer.WriteByte(tree_len); // байт(длина дерева)
+        bits_writer.WriteByte(0); // байт(длина дерева)
+    }
+    else{
+        bits_writer.WriteByte(255); // байт(длина дерева)
+        bits_writer.WriteByte(tree_len - 255); // байт(длина дерева)
+    }
 
     int symbol_deque_len = symbol_stack.size();
 
@@ -318,7 +325,9 @@ void decode(std::vector<byte> &compressed, std::deque<byte> & symbol_deque,
         symbol_deque.push_back(symbol);
     }
 
-    int tree_len = bitsReader.ReadByte(); // байт(длина дерева)
+    int tree_len = bitsReader.ReadByte(); // 2байта(длина дерева)
+    tree_len += bitsReader.ReadByte();
+
     int pass_count_tree = -(-tree_len % 8); // число фиктивных символов. Их надо пропустить
     for (int i = 0; i < pass_count_tree; i++){  // пропускаем фиктивные символы
         bitsReader.ReadBit();
