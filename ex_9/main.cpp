@@ -10,9 +10,7 @@ typedef unsigned char byte;
 class BitsWriter {
 public:
     void WriteBit(bool bit);
-
     void WriteByte(unsigned char byte);
-
     std::vector<unsigned char> GetResult(bool add_len);
 
 private:
@@ -70,7 +68,6 @@ public:
     BitsReader(std::vector<byte> & buffer): buffer_(buffer){}
     bool ReadBit();
     byte ReadByte();
-    int size();
     bool empty();
 private:
     std::vector<byte> & buffer_;
@@ -100,14 +97,14 @@ bool BitsReader::ReadBit(){
         symbol_ = buffer_.back();
         buffer_.pop_back();
     }
-    std::cout << "BC " << bits_count_ << "\n";
+    //std::cout << "BC " << bits_count_ << "\n";
     bool bit = (bool) ((symbol_ >> bits_count_) & 1);
     bits_count_--;
     return bit;
 }
 
 struct Node {
-    int weight;
+    int weight = '0';
     byte symbol = '\0';
     Node *left = nullptr;
     Node *right = nullptr;
@@ -308,30 +305,25 @@ void Encode(std::vector<byte> &original, std::vector<byte> &compressed) {
     ////////////////////////////////////////////////*/
 }
 
+void decode(std::vector<byte> &compressed, std::deque<byte> & symbol_deque,
+            std::deque<int> &tree_structure, std::vector<int> & sequence){
 
-void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
-    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  байт(длина дерева)
-    // | словарь(порядок дерева), байт(длина словаря)
     byte symbol;
     int bit;
     BitsReader bitsReader = BitsReader(compressed);
-
     int symbol_deque_len = bitsReader.ReadByte(); //  байт(длина словаря)
 
-    std::vector<byte> symbol_stack;
     for (int i = 0; i < symbol_deque_len; i++){ // словарь(порядок дерева)
         symbol = bitsReader.ReadByte();
-        symbol_stack.push_back(symbol);
+        symbol_deque.push_back(symbol);
     }
 
     int tree_len = bitsReader.ReadByte(); // байт(длина дерева)
-    int pass_count_tree = 8 - tree_len % 8; // число фиктивных символов. Их надо пропустить
-
+    int pass_count_tree = -(-tree_len % 8); // число фиктивных символов. Их надо пропустить
     for (int i = 0; i < pass_count_tree; i++){  // пропускаем фиктивные символы
         bitsReader.ReadBit();
     }
 
-    std::vector<int> tree_structure; // дерево
     for (int i = 0; i < tree_len; i++){
         bit = bitsReader.ReadBit();
         tree_structure.push_back(bit);
@@ -342,18 +334,17 @@ void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
         bitsReader.ReadBit();
     }
 
-    std::vector<int> sequence; // сообщение
     while (!bitsReader.empty()){
         sequence.push_back(bitsReader.ReadBit());
     }
 
     std::cout << "symbol_deque_len " << symbol_deque_len << "\n";
     for (int i = 0; i < symbol_deque_len; i++){
-        std::cout << symbol_stack[i];
+        std::cout << symbol_deque[i];
     }
     std::cout << "\n";
     std::cout << "tree_len " << tree_len << "\n";
-    std::cout << "pass_count " << pass_count_tree << "\n";
+    std::cout << "pass_count_tree " << pass_count_tree << "\n";
     std::cout << "tree_structure ";
     for (int i = 0; i < tree_len; i++){
         std::cout << tree_structure[i];
@@ -363,16 +354,72 @@ void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
     for (int i = 0; i < sequence.size(); i++){
         std::cout << sequence[i];
     }
+}
+
+struct SimpleNode {
+    byte symbol = '\0';
+    SimpleNode * parent = nullptr;
+    SimpleNode *left = nullptr;
+    SimpleNode *right = nullptr;
+
+    SimpleNode(byte symbol_, SimpleNode * parent_, SimpleNode *left_, SimpleNode *right_)
+            : symbol(symbol_), parent(parent_), left(left_), right(right_) {
+    }
+};
+
+SimpleNode * tree_reconstruct(std::deque<byte> & symbol_deque, std::deque<int> & tree_structure) {
+    SimpleNode *root = new SimpleNode('\0', nullptr, nullptr, nullptr);
+    SimpleNode *current = root;
+    byte symbol;
+    int step = 0;
+
+    while(!tree_structure.empty()){
+        step = tree_structure.front();
+        tree_structure.pop_front();
+
+        if (step == 0){
+            if (current->left == nullptr){
+                current->left = new SimpleNode('\0', nullptr, nullptr, nullptr);
+                current->left->parent = current;
+                current = current->left;
+            }
+            else{
+                current->right = new SimpleNode('\0', nullptr, nullptr, nullptr);
+                current->right->parent = current;
+                current = current->right;
+            }
+        }
+        else{
+            if ((current->left == nullptr) && (current->right == nullptr)){
+                symbol = symbol_deque.front();
+                symbol_deque.pop_front();
+                current->symbol = symbol;
+            }
+            current = current->parent;
+        }
+    }
+    return root;
+}
+
+void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
+    // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  байт(длина дерева)
+    // | словарь(порядок дерева), байт(длина словаря)
+
+    std::deque<byte> symbol_deque;
+    std::deque<int> tree_structure; // дерево
+    std::vector<int> sequence; // сообщение
+
+    decode(compressed, symbol_deque, tree_structure, sequence);
+    SimpleNode * root = tree_reconstruct(symbol_deque, tree_structure);
+
+    std::cout << "\n";
+    std::cout << root->left->left->symbol;
+    std::cout << root->left->right->symbol;
+    std::cout << root->right->symbol;
 
 
+    // TODO: РАСШИФРОВКА !!!
 
-
-
-
-
-
-    // TODO: Check all !!!
-    // TODO: Tree reconstruct. В отдельный класс ???
 
     /*
      for (unsigned char byte : compressed) {
@@ -386,10 +433,17 @@ void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
 
     //std::cout << "symbol_deque_len "<< symbol_deque_len;
     //std::cout << "symbol_deque_len "<< compressed.size();
-
-
-
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
