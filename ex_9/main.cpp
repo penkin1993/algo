@@ -401,6 +401,26 @@ SimpleNode * tree_reconstruct(std::deque<byte> & symbol_deque, std::deque<int> &
     return root;
 }
 
+void original_reconstruct(SimpleNode & root, std::vector<int> & sequence, std::deque<byte> &original){
+    int path = 0;
+    SimpleNode * current = &root;
+    while (!sequence.empty()){
+        path = sequence.back();
+        sequence.pop_back();
+
+        if (path == 0){
+            current = current->left;
+        }
+        else{
+            current = current->right;
+        }
+        if (current->symbol != '\0'){
+            original.push_front(current->symbol);
+            current = &root;
+        }
+    }
+}
+
 void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
     // сообщение, байт(сколько в последнем байте не фиктивно) | дерево,  байт(длина дерева)
     // | словарь(порядок дерева), байт(длина словаря)
@@ -417,8 +437,12 @@ void Decode(std::vector<byte> &compressed, std::deque<byte> &original) {
     std::cout << root->left->right->symbol;
     std::cout << root->right->symbol;
 
+    original_reconstruct(*root, sequence, original);
 
-    // TODO: РАСШИФРОВКА !!!
+    std::cout << "\n";
+    for (int i = 0; i < original.size(); i++){
+        std::cout << original[i];
+    }
 
 
     /*
