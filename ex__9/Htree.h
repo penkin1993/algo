@@ -2,6 +2,7 @@
 #include <queue>
 #include <map>
 #include <functional>
+#include <iostream>
 #include "Huffman.h"
 
 typedef unsigned char byte;
@@ -231,9 +232,23 @@ void encode(const std::map<byte, std::vector<int>> &map_symbols, std::vector<byt
     for (unsigned char value : result) {
         compressed.Write(value);
     }
+
+    ////////////////////////////////////////////////////////////
+    for (unsigned char byte : result) {
+        for (int i = 0; i < 8; ++i) {
+            std::cout << ((byte >> i) & 1);
+        }
+        std::cout << " ";
+    }
+
+    ////////////////////////////////////////////////////////////
+
+
+
     while (!result.empty()) {
         result.pop_back();
     }
+
 }
 
 void Encode(IInputStream &original, IOutputStream &compressed) {
@@ -265,16 +280,27 @@ void decode(std::vector<byte> &compressed, std::deque<byte> &symbol_deque,
     int bit;
     BitsReader bitsReader = BitsReader(compressed);
     int symbol_deque_len = bitsReader.ReadByte(); //  байт(длина словаря)
+    std::cout << "\n";
+    std::cout << "symbol_deque_len " << symbol_deque_len;
 
     for (int i = 0; i < symbol_deque_len; i++) { // словарь(порядок дерева)
         symbol = bitsReader.ReadByte();
         symbol_deque.push_back(symbol);
     }
+    std::cout << "\n";
+    for (int i = 0; i < symbol_deque.size(); i++){
+        std::cout << symbol_deque[i];
+    }
 
     int tree_len = bitsReader.ReadByte(); // 2байта(длина дерева)
     tree_len += bitsReader.ReadByte();
+    std::cout << "\n";
+    std::cout << "tree_len " << symbol_deque_len;
 
     int pass_count_tree = -(-tree_len % 8); // число фиктивных символов. Их надо пропустить
+    std::cout << "\n";
+    std::cout << "pass_count_tree " << pass_count_tree;
+
     for (int i = 0; i < pass_count_tree; i++) {  // пропускаем фиктивные символы
         bitsReader.ReadBit();
     }
@@ -283,8 +309,15 @@ void decode(std::vector<byte> &compressed, std::deque<byte> &symbol_deque,
         bit = bitsReader.ReadBit();
         tree_structure.push_back(bit);
     }
+    std::cout << "\n";
+    for (int i = 0; i < tree_structure.size(); i++){
+        std::cout << tree_structure[i];
+    }
 
-    int pass_count_comp = 8 - bitsReader.ReadByte(); // сколько в последнем байте фиктивно
+    int pass_count_comp = (8 - bitsReader.ReadByte()) % 8; // сколько в последнем байте фиктивно //
+
+    std::cout << "\n";
+    std::cout << "pass_count_comp " << pass_count_comp;
     for (int i = 0; i < pass_count_comp; i++) {  // пропускаем фиктивные символы
         bitsReader.ReadBit();
     }
@@ -293,6 +326,10 @@ void decode(std::vector<byte> &compressed, std::deque<byte> &symbol_deque,
         sequence.push_back(bitsReader.ReadBit());
     }
 }
+
+
+
+
 
 struct SimpleNode {
     byte symbol = '\0';
