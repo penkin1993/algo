@@ -154,18 +154,17 @@ Node *get_tree(std::priority_queue<Node *, std::vector<Node *>, CompareWeight> &
 }
 
 void get_map(Node *root, std::map<byte,
-        std::vector<int>> &map_symbols,
+             std::vector<int>> &map_symbols,
              std::vector<int> acc,
              std::vector<int> &tree_structure,
              std::vector<byte> &symbol_stack) {
 
-    if (root->symbol != '\0') {
+    if ((root->left == nullptr) && (root->right == nullptr)) {
         symbol_stack.push_back(root->symbol);
 
         map_symbols.insert({root->symbol, acc});
         tree_structure.push_back(1); // поднимаемся выше
     } else {
-
         acc.push_back(0);
         tree_structure.push_back(0); // опускаамся влево
         get_map(root->left, map_symbols, acc, tree_structure, symbol_stack);
@@ -179,6 +178,21 @@ void get_map(Node *root, std::map<byte,
         tree_structure.push_back(1); // поднимаемся выше
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void encode(const std::map<byte, std::vector<int>> &map_symbols, std::vector<byte> &original,
             std::vector<int> &tree_structure, std::vector<byte> &symbol_stack, IOutputStream &compressed) {
@@ -208,12 +222,26 @@ void encode(const std::map<byte, std::vector<int>> &map_symbols, std::vector<byt
     }
 
     bits_writer.GetResult(false);
-    if (tree_len < 256) {
+    if (tree_len > 765) {
+        bits_writer.WriteByte(tree_len - 765); // байт(длина дерева)
+        bits_writer.WriteByte(255); // байт(длина дерева)
+        bits_writer.WriteByte(255); // байт(длина дерева)
+        bits_writer.WriteByte(255); // байт(длина дерева)
+    } else if (tree_len > 510){
+        bits_writer.WriteByte(tree_len - 510); // байт(длина дерева)
+        bits_writer.WriteByte(255); // байт(длина дерева)
+        bits_writer.WriteByte(255); // байт(длина дерева)
+        bits_writer.WriteByte(0); // байт(длина дерева)
+    } else if (tree_len > 255){
+        bits_writer.WriteByte(tree_len - 255); // байт(длина дерева)
+        bits_writer.WriteByte(255); // байт(длина дерева)
+        bits_writer.WriteByte(0); // байт(длина дерева)
+        bits_writer.WriteByte(0); // байт(длина дерева)
+    } else{
         bits_writer.WriteByte(tree_len); // байт(длина дерева)
         bits_writer.WriteByte(0); // байт(длина дерева)
-    } else {
-        bits_writer.WriteByte(255); // байт(длина дерева)
-        bits_writer.WriteByte(tree_len - 255); // байт(длина дерева)
+        bits_writer.WriteByte(0); // байт(длина дерева)
+        bits_writer.WriteByte(0); // байт(длина дерева)
     }
 
     int symbol_deque_len = symbol_stack.size();
@@ -286,6 +314,8 @@ void decode(std::vector<byte> &compressed, std::deque<byte> &symbol_deque,
     }
 
     int tree_len = bitsReader.ReadByte(); // 2байта(длина дерева)
+    tree_len += bitsReader.ReadByte();
+    tree_len += bitsReader.ReadByte();
     tree_len += bitsReader.ReadByte();
 
     int pass_count_tree = -(-tree_len % 8); // число фиктивных символов. Их надо пропустить
@@ -372,6 +402,15 @@ SimpleNode *tree_reconstruct(std::deque<byte> &symbol_deque, std::deque<int> &tr
     return root;
 }
 
+
+
+
+
+
+
+
+
+
 void original_reconstruct(SimpleNode &root, std::deque<int> &sequence, IOutputStream &original) {
     int path = 0;
     byte symbol;
@@ -386,7 +425,7 @@ void original_reconstruct(SimpleNode &root, std::deque<int> &sequence, IOutputSt
         } else {
             current = current->right;
         }
-        if (current->symbol != '\0') {
+        if ((current->left == nullptr) && (current->right == nullptr)) {
             original_.push_back(current->symbol);
             current = &root;
         }
@@ -412,8 +451,9 @@ void Decode(IInputStream &compressed, IOutputStream &original) {
     std::deque<int> sequence; // сообщение
 
     decode(compressed_, symbol_deque, tree_structure, sequence);
-    SimpleNode *root = tree_reconstruct(symbol_deque, tree_structure);
 
+
+    SimpleNode *root = tree_reconstruct(symbol_deque, tree_structure);
     original_reconstruct(*root, sequence, original);
 }
 
