@@ -14,8 +14,6 @@
     <list default="true" id="bc1e90b4-2529-41d6-8c90-4f9756ea3240" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ex_2_4/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_2_4/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ex_9/cmake-build-debug/CMakeFiles/ex_9.dir/depend.make" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_9/cmake-build-debug/CMakeFiles/ex_9.dir/depend.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ex_9/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../ex_9/main.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -78,6 +76,7 @@
       <workItem from="1573242868789" duration="2018000" />
       <workItem from="1575130891337" duration="1249000" />
       <workItem from="1575151870244" duration="338000" />
+      <workItem from="1575924730140" duration="577000" />
     </task>
     <servers />
   </component>
