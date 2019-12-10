@@ -79,19 +79,19 @@ void Graph::dfs(int s) {
                 if ((time[adj_v] == -1) && (!in_queue[adj_v])) {// Если вершина белая и не в очереди
                     in_queue[adj_v] = true;
                     child[v].push_back(adj_v); // И в child TODO: Считать дочерней только эту ?????????
-                    parent = v;
+                    std::cout << parent << "\n";
                     q.push(adj_v); // добавлям в стек
                 } else if ((time[adj_v] != -1) && (parent != adj_v))  {
 
                     // TODO: Время неправильное !!!!!
-
-
 
                     if (time[adj_v] < time[v]) { // Если врешина серая и время меньше ???????????????????????????????????????????
                         time[v] = time[adj_v]; // то меняем время на меньшее
                     }
                 }
             }
+            parent = v;
+
         } else { // врешина почти черная
 
 
