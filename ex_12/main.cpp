@@ -20,27 +20,25 @@ ei — номерами концов ребра (1 ≤ bi, ei ≤ n).
 
 class Graph { // TODO: добавить топ 5
 public:
-    Graph(int n_vertices, std::priority_queue<int> &bridges_) : bridges(bridges_) {
+    Graph(int n_vertices, std::priority_queue<int, std::vector<int>, std::greater<>> &bridges_) : bridges(bridges_) {
         for (int i = 1; i < n_vertices + 1; i++) {
             graph_structure[i] = std::vector<int>(0);
             child[i] = std::vector<int>(0);
             time[i] = -1;
         }
     }
-
-    void dfs(int s, int abs_time);
-
     void add(int &vert_1, int &vert_2, int & ord);
 
-    std::priority_queue<int> call();
+    std::priority_queue<int, std::vector<int>, std::greater<>>call();
 
 private:
-    std::priority_queue<int> & bridges;
+    std::priority_queue<int, std::vector<int>, std::greater<>>& bridges;
     std::unordered_map<int, std::vector<int>> graph_structure; // вершина, ребра
     std::unordered_map<int, std::vector<int>> order;  // вершина порядок !!!
     std::unordered_map<int, int> time; // если время отрицательно, то цвет белый
     std::unordered_map<int, std::vector<int>> child;  // цвет вершины. false - серый. true - черный
 
+    void dfs(int s, int abs_time);
 };
 
 void Graph::add(int &vert_1, int &vert_2, int & ord) {
@@ -100,7 +98,7 @@ void Graph::dfs(int s, int abs_time) {
     }
 }
 
-std::priority_queue<int> Graph::call() {
+std::priority_queue<int, std::vector<int>, std::greater<>> Graph::call() {
     int abs_time = 0;
     for (std::pair<int, std::vector<int>> element : graph_structure)
     {
@@ -114,7 +112,7 @@ std::priority_queue<int> Graph::call() {
 int main() {
     std::ifstream input_file("bridges.in");
     std::ofstream output_file("bridges.out");
-    std::priority_queue<int> bridges;
+    std::priority_queue<int, std::vector<int>, std::greater<>> bridges;
     int n_vertices;
     int n_edges;
 
