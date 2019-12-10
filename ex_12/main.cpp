@@ -24,24 +24,29 @@ public:
         for (int i = 1; i < n_vertices + 1; i++) {
             graph_structure[i] = std::vector<int>(0);
             child[i] = std::vector<int>(0);
+            //parent[i] = -1;
             time[i] = -1;
+            in_queue[i] = false;
         }
     }
-    void add(int &vert_1, int &vert_2, int & ord);
 
-    std::priority_queue<int, std::vector<int>, std::greater<>>call();
+    void add(int &vert_1, int &vert_2, int &ord);
+
+    std::priority_queue<int, std::vector<int>, std::greater<>> call();
 
 private:
-    std::priority_queue<int, std::vector<int>, std::greater<>>& bridges;
+    std::priority_queue<int, std::vector<int>, std::greater<>> &bridges;
     std::unordered_map<int, std::vector<int>> graph_structure; // вершина, ребра
     std::unordered_map<int, std::vector<int>> order;  // вершина порядок !!!
     std::unordered_map<int, int> time; // если время отрицательно, то цвет белый
     std::unordered_map<int, std::vector<int>> child;  // цвет вершины. false - серый. true - черный
+    //std::unordered_map<int, int> parent;
+    std::unordered_map<int, bool> in_queue;
 
-    void dfs(int s, int abs_time);
+    void dfs(int s);
 };
 
-void Graph::add(int &vert_1, int &vert_2, int & ord) {
+void Graph::add(int &vert_1, int &vert_2, int &ord) {
     graph_structure[vert_1].push_back(vert_2);
     graph_structure[vert_2].push_back(vert_1);
     order[vert_1].push_back(ord + 1);
@@ -49,9 +54,12 @@ void Graph::add(int &vert_1, int &vert_2, int & ord) {
 }
 
 
-void Graph::dfs(int s, int abs_time) {
+void Graph::dfs(int s) {
+    int abs_time = 0;
+    int parent = -1;
     std::stack<int> q; // буфер для вершин
     q.push(s);
+    in_queue[s] = true; // добавлена в очередь как белая вершина
     int adj_v, v = 0;
     //graph_structure[s].second = 0;
     while (!q.empty()) {
@@ -62,34 +70,42 @@ void Graph::dfs(int s, int abs_time) {
         //     Если вершина белая, то добавлям в стек.
         //     Если врешина серая и время меньше, то меняем время на меньшее
         // Если вершина серая (фактически становится черной). То пытаемся найти мост
-        //
         if (time[v] == -1) { // Если врешина белая,
             time[v] = abs_time; // красим в серый
             q.push(v); // добавляем в стек.
             abs_time++; // Увеличиваем время
             for (int i = 0; i < graph_structure[v].size(); i++) {
                 adj_v = graph_structure[v][i];
-                if (time[adj_v] == -1) {// Если вершина белая
+                if ((time[adj_v] == -1) && (!in_queue[adj_v])) {// Если вершина белая и не в очереди
+                    in_queue[adj_v] = true;
+                    child[v].push_back(adj_v); // И в child TODO: Считать дочерней только эту ?????????
+                    parent = v;
                     q.push(adj_v); // добавлям в стек
-                    child[v].push_back(adj_v); // И в child
+                } else if ((time[adj_v] != -1) && (parent != adj_v))  {
+
+                    // TODO: Время неправильное !!!!!
+
+
+
+                    if (time[adj_v] < time[v]) { // Если врешина серая и время меньше ???????????????????????????????????????????
+                        time[v] = time[adj_v]; // то меняем время на меньшее
+                    }
                 }
-                //else{
-                //    if (time[adj_v] < time[v]){ // Если врешина серая и время меньше ???????????????????????????????????????????
-                //        time[v] = time[adj_v]; // то меняем время на меньшее
-                //    }
-                //}
             }
         } else { // врешина почти черная
+
+
+
             //Обновить время от детей
             for (int i = 0; i < child[v].size(); i++) { // не может быть белых врешин !!!!
                 adj_v = child[v][i];
                 if (time[adj_v] < time[v]) {
                     time[v] = time[adj_v];
                 }
-
-                for (int i = 0; i < graph_structure[v].size(); i++) { // не может быть белых врешин !!!! // Можно конечно не по всем
+                for (int i = 0; i < graph_structure[v].size(); i++) { // не может быть белых врешин ! // Оптимизация ?
                     adj_v = graph_structure[v][i];
                     if (time[adj_v] < time[v]) {
+
                         bridges.push(order[v][i]);
                     }
                 }
@@ -99,11 +115,9 @@ void Graph::dfs(int s, int abs_time) {
 }
 
 std::priority_queue<int, std::vector<int>, std::greater<>> Graph::call() {
-    int abs_time = 0;
-    for (std::pair<int, std::vector<int>> element : graph_structure)
-    {
-        if(time[element.first] == -1){
-            dfs(element.first, abs_time);
+    for (std::pair<int, std::vector<int>> element : graph_structure) {
+        if (time[element.first] == -1) {
+            dfs(element.first);
         }
     }
     return bridges;
@@ -133,7 +147,7 @@ int main() {
 
     int size = bridges.size();
     output_file << size << "\n";
-    for (int i = 0; i < size; i++){
+    for (int i = 0; i < size; i++) {
         output_file << bridges.top() << "\n";
         bridges.pop();
     }
