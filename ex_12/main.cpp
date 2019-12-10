@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <deque>
 #include <queue>
+#include <fstream>
 
 /*
 Мосты.
@@ -21,107 +22,127 @@ class Graph { // TODO: добавить топ 5
 public:
     Graph(int n_vertices);
 
-    void bfs(int s);
+    void dfs(int s, int abs_time);
 
-    void add(int &vert_1, int &vert_2);
+    void add(int &vert_1, int &vert_2, int & ord);
 
-    int call(int s_in, int s_out);
+    int call();
 
 private:
-    int counter_path = 0;
+    std::priority_queue<int> bridges;
+    std::unordered_map<int, std::vector<int>> graph_structure; // вершина, ребра
+    std::unordered_map<int, std::vector<int>> order;  // вершина порядок !!!
+    std::unordered_map<int, int> time; // если время отрицательно, то цвет белый
+    std::unordered_map<int, std::vector<int>> child;  // цвет вершины. false - серый. true - черный
 
-    void rev_bfs(int s_in, int s_out);
-
-    std::unordered_map<int, std::pair<std::vector<int>, int>> graph_structure; // вершина, ребра, степень
 };
 
 Graph::Graph(int n_vertices) {
-    for (int i = 0; i < n_vertices; i++) {
-        graph_structure[i] = std::make_pair(std::vector<int>(0), -1);
+    for (int i = 1; i < n_vertices + 1; i++) {
+        graph_structure[i] = std::vector<int>(0);
+        child[i] = std::vector<int>(0);
+        time[i] = -1;
     }
 }
 
-void Graph::add(int &vert_1, int &vert_2) {
-    graph_structure[vert_1].first.push_back(vert_2);
-    graph_structure[vert_2].first.push_back(vert_1);
-    //std::cout << "add " << vert_1;
+void Graph::add(int &vert_1, int &vert_2, int & ord) {
+    graph_structure[vert_1].push_back(vert_2);
+    graph_structure[vert_2].push_back(vert_1);
+    order[vert_1].push_back(ord + 1);
+    order[vert_2].push_back(ord + 1);
 }
 
-void Graph::bfs(int s) { //
-    std::queue<int> q; // буфер для вершин
+
+void Graph::dfs(int s, int abs_time) {
+    std::stack<int> q; // буфер для вершин
     q.push(s);
     int adj_v, v = 0;
-    graph_structure[s].second = 0;
+    //graph_structure[s].second = 0;
     while (!q.empty()) {
-        v = q.front();
+        v = q.top();
         q.pop();
-        for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
-            adj_v = graph_structure[v].first[i];
-            if (graph_structure[adj_v].second == -1) { // получить все смежные вершины и записать их в стек
-                graph_structure[adj_v].second = graph_structure[v].second + 1;
-                //std::cout << adj_v << " " << graph_structure[adj_v].second << "\n";
-                q.push(adj_v);
+        // Если врешина белая, то красим в серый и добавляем в стек. Увеличиваем время
+        //     Итерируемся по всем вершинам.
+        //     Если вершина белая, то добавлям в стек.
+        //     Если врешина серая и время меньше, то меняем время на меньшее
+        // Если вершина серая (фактически становится черной). То пытаемся найти мост
+        //
+        if (time[v] == -1) { // Если врешина белая,
+            time[v] = abs_time; // красим в серый
+            q.push(v); // добавляем в стек.
+            abs_time++; // Увеличиваем время
+            for (int i = 0; i < graph_structure[v].size(); i++) {
+                adj_v = graph_structure[v][i];
+                if (time[adj_v] == -1) {// Если вершина белая
+                    q.push(adj_v); // добавлям в стек
+                    child[v].push_back(adj_v); // И в child
+                }
+                //else{
+                //    if (time[adj_v] < time[v]){ // Если врешина серая и время меньше ???????????????????????????????????????????
+                //        time[v] = time[adj_v]; // то меняем время на меньшее
+                //    }
+                //}
             }
-        }
-    }
-}
+        } else { // врешина почти черная
+            //Обновить время от детей
+            for (int i = 0; i < child[v].size(); i++) { // не может быть белых врешин !!!!
+                adj_v = child[v][i];
+                if (time[adj_v] < time[v]) {
+                    time[v] = time[adj_v];
+                }
 
-
-void Graph::rev_bfs(int s_in, int s_out) {
-    if(s_in == s_out){
-        counter_path++;
-        return;
-    }
-    std::queue<int> q; // буфер для вершин
-    int adj_v, v;
-    q.push(s_out);
-
-    while(!q.empty()) {
-        v = q.front();
-        q.pop();
-
-        for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
-            adj_v = graph_structure[v].first[i];
-            //std::cout << "Compare " << adj_v << " " <<  graph_structure[adj_v].second << "; " << v << " " << graph_structure[v].second << "\n";
-            if (graph_structure[adj_v].second == (graph_structure[v].second - 1)) {
-                if (adj_v == s_in){
-                    counter_path++;
-                } else{
-                    q.push(adj_v);
+                for (int i = 0; i < graph_structure[v].size(); i++) { // не может быть белых врешин !!!! // Можно конечно не по всем
+                    adj_v = graph_structure[v][i];
+                    if (time[adj_v] < time[v]) {
+                        bridges.push(order[v][i]);
+                    }
                 }
             }
         }
     }
 }
 
-
-int Graph::call(int s_in, int s_out) {
-    bfs(s_in);
-    rev_bfs(s_in, s_out);
-    return counter_path;
+int Graph::call() {
+    int abs_time = 0;
+    for (std::pair<int, std::vector<int>> element : graph_structure)
+    {
+        if(time[element.first] == -1){
+            dfs(element.first, abs_time);
+        }
+    }
+    return bridge_count;
 }
 
-int main() { // TODO: Кратные ребра !!!
-    int n_vertices = 0;
-    int n_edges = 0;
+int main() {
+    std::ifstream input_file("bridges.in");
+    std::ofstream output_file("bridges.out");
+    int n_vertices;
+    int n_edges;
 
-    std::cin >> n_vertices;
-    std::cin >> n_edges;
-
+    input_file >> n_vertices >> n_edges;
     Graph graph = *new Graph(n_vertices);
-    int vert_1;
-    int vert_2;
 
+    std::vector<int64_t> arr;
+    std::string line;
+
+    int v1, v2;
     for (int i = 0; i < n_edges; i++) {
-        std::cin >> vert_1 >> vert_2;
-        graph.add(vert_1, vert_2);
+        input_file >> v1 >> v2;
+        graph.add(v1, v2, i);
     }
+    input_file.close();
 
-    int s_in, s_out;
-    std::cin >> s_in >> s_out;
-    std::cout << graph.call(s_in, s_out);
+    graph.call();
+
+
+    output_file << 1 << "\n";
+    for (int i = 0; i < 1; i++){
+        output_file << 3 << "\n";
+    }
+    output_file.close();
 
     return 0;
 }
+
 
 
