@@ -87,20 +87,28 @@ void Graph::bfs(int s) { // TODO: Освободить q
     }
 }
 
-void Graph::rev_bfs(int s_in, int s_out) {
-    if (s_in == s_out) {
-        //std::cout << "COUNTER \n";
+void Graph::rev_bfs(int s_in, int s_out) { // TODO: Более парвильный выход ????
+    if(s_in == s_out){
         counter_path++;
-    } else {
-        int adj_v;
-        for (int i = 0; i < graph_structure[s_out].first.size(); i++) {// итерируемся по всем смежным вершинам
-            adj_v = graph_structure[s_out].first[i];
-            if (graph_structure[adj_v].second == (graph_structure[s_out].second - 1)) {
-                rev_bfs(s_in, adj_v);
+        return;
+    }
+    std::queue<int> q; // буфер для вершин
+    int adj_v, v;
+    q.push(s_out);
+    while(!q.empty()) {
+        v = q.front();
+        q.pop();
+
+        for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
+            adj_v = graph_structure[v].first[i];
+            if (graph_structure[adj_v].second == (graph_structure[v].second - 1)) {
+                if (adj_v == s_in){
+                    counter_path++;
+                } else{
+                    q.push(adj_v);
+                }
             }
         }
-        // найти смежные вершины с минимальным весом (на единицу меньше)
-        // запустить рекрсивно данную функцию на них
     }
 }
 
