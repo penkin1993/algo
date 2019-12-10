@@ -20,30 +20,28 @@ ei — номерами концов ребра (1 ≤ bi, ei ≤ n).
 
 class Graph { // TODO: добавить топ 5
 public:
-    Graph(int n_vertices);
+    Graph(int n_vertices, std::priority_queue<int> &bridges_) : bridges(bridges_) {
+        for (int i = 1; i < n_vertices + 1; i++) {
+            graph_structure[i] = std::vector<int>(0);
+            child[i] = std::vector<int>(0);
+            time[i] = -1;
+        }
+    }
 
     void dfs(int s, int abs_time);
 
     void add(int &vert_1, int &vert_2, int & ord);
 
-    int call();
+    std::priority_queue<int> call();
 
 private:
-    std::priority_queue<int> bridges;
+    std::priority_queue<int> & bridges;
     std::unordered_map<int, std::vector<int>> graph_structure; // вершина, ребра
     std::unordered_map<int, std::vector<int>> order;  // вершина порядок !!!
     std::unordered_map<int, int> time; // если время отрицательно, то цвет белый
     std::unordered_map<int, std::vector<int>> child;  // цвет вершины. false - серый. true - черный
 
 };
-
-Graph::Graph(int n_vertices) {
-    for (int i = 1; i < n_vertices + 1; i++) {
-        graph_structure[i] = std::vector<int>(0);
-        child[i] = std::vector<int>(0);
-        time[i] = -1;
-    }
-}
 
 void Graph::add(int &vert_1, int &vert_2, int & ord) {
     graph_structure[vert_1].push_back(vert_2);
@@ -102,7 +100,7 @@ void Graph::dfs(int s, int abs_time) {
     }
 }
 
-int Graph::call() {
+std::priority_queue<int> Graph::call() {
     int abs_time = 0;
     for (std::pair<int, std::vector<int>> element : graph_structure)
     {
@@ -110,17 +108,18 @@ int Graph::call() {
             dfs(element.first, abs_time);
         }
     }
-    return bridge_count;
+    return bridges;
 }
 
 int main() {
     std::ifstream input_file("bridges.in");
     std::ofstream output_file("bridges.out");
+    std::priority_queue<int> bridges;
     int n_vertices;
     int n_edges;
 
     input_file >> n_vertices >> n_edges;
-    Graph graph = *new Graph(n_vertices);
+    Graph graph = *new Graph(n_vertices, bridges);
 
     std::vector<int64_t> arr;
     std::string line;
@@ -134,10 +133,11 @@ int main() {
 
     graph.call();
 
-
-    output_file << 1 << "\n";
-    for (int i = 0; i < 1; i++){
-        output_file << 3 << "\n";
+    int size = bridges.size();
+    output_file << size << "\n";
+    for (int i = 0; i < size; i++){
+        output_file << bridges.top() << "\n";
+        bridges.pop();
     }
     output_file.close();
 
