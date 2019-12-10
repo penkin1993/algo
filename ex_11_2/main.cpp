@@ -52,12 +52,12 @@ void Graph::add(int &vert_1, int &vert_2) {
     //std::cout << "add " << vert_1;
 }
 
-void Graph::bfs(int s) { // TODO: Освободить q
+void Graph::bfs(int s) { //
     std::queue<int> q; // буфер для вершин
     q.push(s);
     int adj_v, v = 0;
     graph_structure[s].second = 0;
-    while (!q.empty()) { // TODO: Более парвильный выход ????
+    while (!q.empty()) {
         v = q.front();
         q.pop();
         for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
@@ -72,9 +72,7 @@ void Graph::bfs(int s) { // TODO: Освободить q
 }
 
 
-
-
-void Graph::rev_bfs(int s_in, int s_out) { // TODO: Более парвильный выход ????
+void Graph::rev_bfs(int s_in, int s_out) {
     if(s_in == s_out){
         counter_path++;
         return;
