@@ -64,12 +64,22 @@ void Graph::dfs(int s) {
     //graph_structure[s].second = 0;
     while (!q.empty()) {
         v = q.top();
+        //std::cout << "\n";
+        //std::cout << "v " << v << "\n";
         q.pop();
         // Если врешина белая, то красим в серый и добавляем в стек. Увеличиваем время
         //     Итерируемся по всем вершинам.
         //     Если вершина белая, то добавлям в стек.
         //     Если врешина серая и время меньше, то меняем время на меньшее
         // Если вершина серая (фактически становится черной). То пытаемся найти мост
+
+
+        for (std::pair<int, int> element : time) {
+            std::cout << "time : " << element.first << " " << element.second << "\n";
+        }
+        std::cout << "\n"; // TODO: Check !!!
+
+
         if (time[v] == -1) { // Если врешина белая,
             time[v] = abs_time; // красим в серый
             q.push(v); // добавляем в стек.
@@ -79,11 +89,12 @@ void Graph::dfs(int s) {
                 if ((time[adj_v] == -1) && (!in_queue[adj_v])) {// Если вершина белая и не в очереди
                     in_queue[adj_v] = true;
                     child[v].push_back(adj_v); // И в child TODO: Считать дочерней только эту ?????????
-                    std::cout << parent << "\n";
                     q.push(adj_v); // добавлям в стек
                 } else if ((time[adj_v] != -1) && (parent != adj_v))  {
-
                     // TODO: Время неправильное !!!!!
+                    // TODO: У 6 не обновилось время !!!
+                    // TODO У 6 -- 3, должно быть 2
+
 
                     if (time[adj_v] < time[v]) { // Если врешина серая и время меньше ???????????????????????????????????????????
                         time[v] = time[adj_v]; // то меняем время на меньшее
@@ -91,11 +102,10 @@ void Graph::dfs(int s) {
                 }
             }
             parent = v;
-
+            //std::cout << parent << "\n";
+            // TODO: Почему не проверяется сначала 5 ???
+            // TODO: Грамотно ставить parent !!!
         } else { // врешина почти черная
-
-
-
             //Обновить время от детей
             for (int i = 0; i < child[v].size(); i++) { // не может быть белых врешин !!!!
                 adj_v = child[v][i];
