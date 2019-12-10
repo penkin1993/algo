@@ -55,7 +55,6 @@ void Graph::add(int &vert_1, int &vert_2) {
 void Graph::bfs(int s) { // TODO: Освободить q
     std::queue<int> q; // буфер для вершин
     q.push(s);
-    //int counter = 1;
     int adj_v, v = 0;
     graph_structure[0].second = 0;
     while (!q.empty()) { // TODO: Более парвильный выход ????
@@ -69,7 +68,6 @@ void Graph::bfs(int s) { // TODO: Освободить q
                 q.push(adj_v);
             }
         }
-        //counter++;
     }
 }
 
