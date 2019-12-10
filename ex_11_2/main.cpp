@@ -56,7 +56,7 @@ void Graph::bfs(int s) { // TODO: Освободить q
     std::queue<int> q; // буфер для вершин
     q.push(s);
     int adj_v, v = 0;
-    graph_structure[0].second = 0;
+    graph_structure[s].second = 0;
     while (!q.empty()) { // TODO: Более парвильный выход ????
         v = q.front();
         q.pop();
@@ -64,12 +64,15 @@ void Graph::bfs(int s) { // TODO: Освободить q
             adj_v = graph_structure[v].first[i];
             if (graph_structure[adj_v].second == -1) { // получить все смежные вершины и записать их в стек
                 graph_structure[adj_v].second = graph_structure[v].second + 1;
-                std::cout << adj_v << " " << graph_structure[adj_v].second << "\n";
+                //std::cout << adj_v << " " << graph_structure[adj_v].second << "\n";
                 q.push(adj_v);
             }
         }
     }
 }
+
+
+
 
 void Graph::rev_bfs(int s_in, int s_out) { // TODO: Более парвильный выход ????
     if(s_in == s_out){
@@ -79,12 +82,14 @@ void Graph::rev_bfs(int s_in, int s_out) { // TODO: Более парвильн�
     std::queue<int> q; // буфер для вершин
     int adj_v, v;
     q.push(s_out);
+
     while(!q.empty()) {
         v = q.front();
         q.pop();
 
         for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
             adj_v = graph_structure[v].first[i];
+            //std::cout << "Compare " << adj_v << " " <<  graph_structure[adj_v].second << "; " << v << " " << graph_structure[v].second << "\n";
             if (graph_structure[adj_v].second == (graph_structure[v].second - 1)) {
                 if (adj_v == s_in){
                     counter_path++;
@@ -129,6 +134,7 @@ int main() {
 /*
  Пример
 Ввод	Вывод
+////////////////////////////////////
 4
 5
 0 1
@@ -139,10 +145,7 @@ int main() {
 
 0 3
 2
-
-
-
-
+////////////////////////////////////
 3
 3
 0 1
@@ -151,8 +154,7 @@ int main() {
 
 0 1
 1
-
-
+////////////////////////////////////
 5
 7
 0 1
@@ -165,6 +167,19 @@ int main() {
 
 0 4
 1
+//////////////////////////////////////
+5
+7
+0 1
+0 2
+1 2
+1 3
+2 3
+3 4
+2 4
+
+2 3
+0
 */
 
 
