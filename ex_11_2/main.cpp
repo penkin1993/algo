@@ -20,20 +20,6 @@ n пар реберных вершин,
 
 Формат вывода
 Количество кратчайших путей от v к w.
-
-Пример
-Ввод	Вывод
-4
-5
-0 1
-0 2
-1 2
-1 3
-2 3
-
-0 3
-2
-
  */
 
 class Graph { // TODO: добавить топ 5
@@ -69,7 +55,7 @@ void Graph::add(int &vert_1, int &vert_2) {
 void Graph::bfs(int s) { // TODO: Освободить q
     std::queue<int> q; // буфер для вершин
     q.push(s);
-    int counter = 1;
+    //int counter = 1;
     int adj_v, v = 0;
     graph_structure[0].second = 0;
     while (!q.empty()) { // TODO: Более парвильный выход ????
@@ -78,12 +64,12 @@ void Graph::bfs(int s) { // TODO: Освободить q
         for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
             adj_v = graph_structure[v].first[i];
             if (graph_structure[adj_v].second == -1) { // получить все смежные вершины и записать их в стек
-                graph_structure[adj_v].second = counter;
-                //std::cout << adj_v << " " << counter << "\n";
+                graph_structure[adj_v].second = graph_structure[v].second + 1;
+                std::cout << adj_v << " " << graph_structure[adj_v].second << "\n";
                 q.push(adj_v);
             }
         }
-        counter++;
+        //counter++;
     }
 }
 
@@ -141,3 +127,46 @@ int main() {
 
     return 0;
 }
+
+/*
+ Пример
+Ввод	Вывод
+4
+5
+0 1
+0 2
+1 2
+1 3
+2 3
+
+0 3
+2
+
+
+
+
+3
+3
+0 1
+0 2
+1 2
+
+0 1
+1
+
+
+5
+7
+0 1
+0 2
+1 2
+1 3
+2 3
+3 4
+2 4
+
+0 4
+1
+*/
+
+
