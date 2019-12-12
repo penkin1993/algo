@@ -322,29 +322,6 @@ void decode(std::vector<byte> &compressed, std::deque<byte> &symbol_deque,
         bitsReader.ReadBit();
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    /*
-   std::cout << "\n";
-   std::cout << "symbol_deque_len " << symbol_deque_len;
-   std::cout << "\n";
-   for (int i = 0; i < symbol_deque.size(); i++){
-       std::cout << symbol_deque[i];
-   }
-   std::cout << "\n";
-   std::cout << "tree_len " << symbol_deque_len;
-   std::cout << "\n";
-   std::cout << "pass_count_tree " << pass_count_tree;
-   std::cout << "\n";
-   for (int i = 0; i < tree_structure.size(); i++){
-       std::cout << tree_structure[i];
-   }
-        std::cout << "\n";
-   std::cout << "pass_count_comp " << pass_count_comp;
-    ///////////////////////////////////////////////////////////////////////
-
-     */
-
-
     while (!bitsReader.empty()) {
         sequence.push_back(bitsReader.ReadBit());
     }
