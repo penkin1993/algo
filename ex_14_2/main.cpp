@@ -51,9 +51,9 @@ struct Edge {
     int weight;
 
     Edge(int left_, int right_, int weight_) : left(left_), right(right_), weight(weight_) {}
-    ~Edge(){
-        //delete Edge; // TODO: ????
-    }
+    //~Edge(){
+    //    //delete Edge; // TODO: ????
+    //}
 };
 
 struct CompareEdge {
@@ -66,8 +66,9 @@ class EdgeQueue {
 
 public:
     void add(int left_, int right_, int weight_);
-    ~EdgeQueue();
-    Edge * get();
+
+    //~EdgeQueue();
+    Edge *get();
 
 private:
     std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> q;
@@ -77,50 +78,52 @@ void EdgeQueue::add(int left_, int right_, int weight_) {
     q.push(new Edge(left_, right_, weight_));
 }
 
-Edge * EdgeQueue::get() {
+Edge *EdgeQueue::get() {
     if (!q.empty()) {
-        Edge * e = q.top();
+        Edge *e = q.top();
         q.pop(); // TODO: Отрабатывает ли деструктор ???
         return e;
-    }
-    else{
+    } else {
         return nullptr;
     }
 }
 
-EdgeQueue::~EdgeQueue() { // TODO: Дестркутор !!!
+//EdgeQueue::~EdgeQueue() { // TODO: Дестркутор !!!
 
-}
+//}
 
 /////////////////////////////////////////////////////////////////////////
 class SpanTree {
 public:
     explicit SpanTree(int n_vertices);
-    ~SpanTree(); // TODO !!!???
-    int get(EdgeQueue & edgeQueue); // основная бизнес логика
+
+    //~SpanTree(); // TODO !!!???
+    int get(EdgeQueue &edgeQueue); // основная бизнес логика
 private:
-    int64_t weight = 0; // вес минимального остовного дерева
+    int weight = 0; // вес минимального остовного дерева
     std::unordered_map<int, int> vertices;
+
     void uniteSets(int component1, int component2, int weight_);
+
     int findComponent(int vert);
 };
 
 SpanTree::SpanTree(int n_vertices) {
-    for (int i = 1; i < n_vertices + 1; i++){
+    for (int i = 1; i < n_vertices + 1; i++) {
         vertices[i] = i;
     }
 }
 
-SpanTree::~SpanTree() {}
+//SpanTree::~SpanTree() {}
 
-int SpanTree::get(EdgeQueue & edgeQueue) {
-    Edge * edge;
+int SpanTree::get(EdgeQueue &edgeQueue) {
+    Edge *edge;
     int component1;
     int component2;
-    while( (edge = edgeQueue.get()) != nullptr){
+    while ((edge = edgeQueue.get()) != nullptr) {
         component1 = findComponent(edge->left);
         component2 = findComponent(edge->right);
-        if (component1 != component2){
+        if (component1 != component2) {
             uniteSets(component1, component2, edge->weight); // левое множество, правое множество, новый вес
         }
     }
@@ -136,7 +139,7 @@ void SpanTree::uniteSets(int component1, int component2, int weight_) {
         vertices[currentVert] = component1; // присваиваем вершине
         currentVert = nextVert;
     }
-    //////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////
     vertices[component2] = component1;
     weight += weight_;
 }
@@ -165,14 +168,12 @@ int SpanTree::findComponent(int vert, bool isFirst) {
 
 int SpanTree::findComponent(int vert) {
     int currentVert = vert;
-    while (currentVert != vertices[currentVert]){
+    while (currentVert != vertices[currentVert]) {
         currentVert = vertices[currentVert]; // переходим к следующему элементу
     }
     vertices[vert] = currentVert;
     return currentVert;
 }
-
-
 
 int main() {
     int n_vertices;
@@ -191,7 +192,7 @@ int main() {
     }
 
     SpanTree spanTree = SpanTree(n_vertices);
-    int64_t weight = spanTree.get(edgeQueue);
+    int weight = spanTree.get(edgeQueue);
 
     std::cout << weight;
     return 0;
