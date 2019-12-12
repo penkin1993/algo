@@ -102,7 +102,7 @@ private:
     int64_t weight = 0; // вес минимального остовного дерева
     std::unordered_map<int, int> vertices;
     void uniteSets(int component1, int component2, int weight_);
-    int findComponent(int vert, bool is_first);
+    int findComponent(int vert);
 };
 
 SpanTree::SpanTree(int n_vertices) {
@@ -118,8 +118,8 @@ int SpanTree::get(EdgeQueue & edgeQueue) {
     int component1;
     int component2;
     while( (edge = edgeQueue.get()) != nullptr){
-        component1 = findComponent(edge->left, true);
-        component2 = findComponent(edge->right, false);
+        component1 = findComponent(edge->left);
+        component2 = findComponent(edge->right);
         if (component1 != component2){
             uniteSets(component1, component2, edge->weight); // левое множество, правое множество, новый вес
         }
@@ -128,10 +128,20 @@ int SpanTree::get(EdgeQueue & edgeQueue) {
 }
 
 void SpanTree::uniteSets(int component1, int component2, int weight_) {
-    vertices[component1] = component2;
+    ////////////////////////////////////////////////////////////////////
+    int currentVert = component2;
+    int nextVert = component2;
+    while (nextVert != vertices[nextVert]) {
+        nextVert = vertices[currentVert]; // переходим к следующему элементу
+        vertices[currentVert] = component1; // присваиваем вершине
+        currentVert = nextVert;
+    }
+    //////////////////////////////////////////////////////////////////// 
+    vertices[component2] = component1;
     weight += weight_;
 }
 
+/*
 int SpanTree::findComponent(int vert, bool isFirst) {
     int currentVert = vert;
     int nextVert = vert;
@@ -151,8 +161,16 @@ int SpanTree::findComponent(int vert, bool isFirst) {
         return nextVert;
     }
 }
+*/
 
-
+int SpanTree::findComponent(int vert) {
+    int currentVert = vert;
+    while (currentVert != vertices[currentVert]){
+        currentVert = vertices[currentVert]; // переходим к следующему элементу
+    }
+    vertices[vert] = currentVert;
+    return currentVert;
+}
 
 
 
