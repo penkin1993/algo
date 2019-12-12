@@ -102,7 +102,7 @@ private:
     int64_t weight = 0; // вес минимального остовного дерева
     std::unordered_map<int, int> vertices;
     void uniteSets(int component1, int component2, int weight_);
-    int findComponent(int vert);
+    int findComponent(int vert, bool is_first);
 };
 
 SpanTree::SpanTree(int n_vertices) {
@@ -118,8 +118,8 @@ int SpanTree::get(EdgeQueue & edgeQueue) {
     int component1;
     int component2;
     while( (edge = edgeQueue.get()) != nullptr){
-        component1 = findComponent(edge->left);
-        component2 = findComponent(edge->right);
+        component1 = findComponent(edge->left, true);
+        component2 = findComponent(edge->right, false);
         if (component1 != component2){
             uniteSets(component1, component2, edge->weight); // левое множество, правое множество, новый вес
         }
@@ -128,18 +128,32 @@ int SpanTree::get(EdgeQueue & edgeQueue) {
 }
 
 void SpanTree::uniteSets(int component1, int component2, int weight_) {
-    vertices[component2] = component1;
+    vertices[component1] = component2;
     weight += weight_;
 }
 
-int SpanTree::findComponent(int vert) {
-    int linkVert = vert;
-    while (linkVert != vertices[linkVert]){
-        linkVert = vertices[linkVert];
+int SpanTree::findComponent(int vert, bool isFirst) {
+    int currentVert = vert;
+    int nextVert = vert;
+    while (nextVert != vertices[nextVert]){
+        nextVert = vertices[currentVert]; // переходим к следующему элементу
+        //if (isFirst) {
+        vertices[currentVert] = vert; // присваиваем вершине
+        currentVert = nextVert;
+        //}
     }
-    vertices[vert] = linkVert; // переподвешивание
-    return linkVert;
+    vertices[nextVert] = vert; // меняеем рута кмопоннеты
+
+    if (isFirst) {
+        return vert;
+    }
+    else{
+        return nextVert;
+    }
 }
+
+
+
 
 
 int main() {
