@@ -130,13 +130,13 @@ int SpanTree::get(EdgeQueue &edgeQueue) {
 
 void SpanTree::uniteSets(int component1, int component2, int weight_) {
     ////////////////////////////////////////////////////////////////////
-    int currentVert = component2;
+    /*int currentVert = component2;
     int nextVert = component2;
     while (nextVert != vertices[nextVert]) {
         nextVert = vertices[currentVert]; // переходим к следующему элементу
         vertices[currentVert] = component1; // присваиваем вершине
         currentVert = nextVert;
-    }
+    }*/
     ////////////////////////////////////////////////////////////////////
     vertices[component2] = component1;
     weight += weight_;
