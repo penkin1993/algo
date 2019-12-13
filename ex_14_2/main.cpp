@@ -68,7 +68,7 @@ public:
     void add(int left_, int right_, int weight_);
 
     //~EdgeQueue();
-    Edge *get();
+    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *get();
 
 private:
     std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> q;
@@ -78,14 +78,8 @@ void EdgeQueue::add(int left_, int right_, int weight_) {
     q.push(new Edge(left_, right_, weight_));
 }
 
-Edge *EdgeQueue::get() {
-    if (!q.empty()) {
-        Edge *e = q.top();
-        q.pop(); // TODO: Отрабатывает ли деструктор ???
-        return e;
-    } else {
-        return nullptr;
-    }
+std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *EdgeQueue::get() {
+    return & q;
 }
 
 //EdgeQueue::~EdgeQueue() { // TODO: Дестркутор !!!
@@ -120,7 +114,11 @@ int SpanTree::get(EdgeQueue &edgeQueue) {
     Edge *edge;
     int component1;
     int component2;
-    while ((edge = edgeQueue.get()) != nullptr) {
+    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> * q;
+    q = edgeQueue.get();
+    while (!q->empty()) {
+        edge = q->top();
+        q->pop();
         component1 = findComponent(edge->left);
         component2 = findComponent(edge->right);
         if (component1 != component2) {
