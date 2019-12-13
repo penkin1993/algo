@@ -43,7 +43,7 @@ B. Минимальное остовное дерево 2018
 
 #include <iostream>
 #include <queue>
-#include <unordered_map>
+#include <vector>
 
 struct Edge {
     int left;
@@ -51,9 +51,6 @@ struct Edge {
     int weight;
 
     Edge(int left_, int right_, int weight_) : left(left_), right(right_), weight(weight_) {}
-    //~Edge(){
-    //    //delete Edge; // TODO: ????
-    //}
 };
 
 struct CompareEdge {
@@ -79,99 +76,66 @@ void EdgeQueue::add(int left_, int right_, int weight_) {
 }
 
 std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *EdgeQueue::get() {
-    return & q;
+    return &q;
 }
 
-//EdgeQueue::~EdgeQueue() { // TODO: Дестркутор !!!
-
-//}
-
-/////////////////////////////////////////////////////////////////////////
-class SpanTree {
+class DSU {
 public:
-    explicit SpanTree(int n_vertices);
+    explicit DSU(size_t size);
 
-    //~SpanTree(); // TODO !!!???
-    int get(EdgeQueue &edgeQueue); // основная бизнес логика
+    int find(int element);
+
+    void merge(int left, int right);
+
+    int get(EdgeQueue &edgeQueue);
+
 private:
-    int weight = 0; // вес минимального остовного дерева
-    std::unordered_map<int, int> vertices;
-
-    void uniteSets(int component1, int component2, int weight_);
-
-    int findComponent(int vert);
+    int weight = 0;
+    std::vector<int> parent;
+    std::vector<int> rank;
 };
 
-SpanTree::SpanTree(int n_vertices) {
-    for (int i = 1; i < n_vertices + 1; i++) {
-        vertices[i] = i;
+DSU::DSU(size_t size) :
+        parent(size, -1),
+        rank(size, 1) {}
+
+int DSU::find(int element) {
+    if (parent[element] == -1) {
+        return element;
+    }
+    return parent[element] = find(parent[element]);
+}
+
+void DSU::merge(int deputat_left, int deputat_right) {
+    if (rank[deputat_left] == rank[deputat_right]) {
+        parent[deputat_right] = deputat_left;
+        ++rank[deputat_left];
+    } else if (rank[deputat_left] > rank[deputat_right]) {
+        parent[deputat_right] = deputat_left;
+    } else {
+        parent[deputat_left] = deputat_right;
     }
 }
 
-//SpanTree::~SpanTree() {}
-
-int SpanTree::get(EdgeQueue &edgeQueue) {
+int DSU::get(EdgeQueue &edgeQueue) {
     Edge *edge;
-    int component1;
-    int component2;
-    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> * q;
+    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *q;
     q = edgeQueue.get();
     while (!q->empty()) {
         edge = q->top();
         q->pop();
-        component1 = findComponent(edge->left);
-        component2 = findComponent(edge->right);
-        if (component1 != component2) {
-            uniteSets(component1, component2, edge->weight); // левое множество, правое множество, новый вес
+
+        int deputat_left = find(edge->left - 1);
+        int deputat_right = find(edge->right - 1);
+
+        if (deputat_left != deputat_right) {
+            merge(deputat_left, deputat_right);
+            weight += edge->weight;
         }
     }
     return weight;
 }
 
-void SpanTree::uniteSets(int component1, int component2, int weight_) {
-    ////////////////////////////////////////////////////////////////////
-    /*int currentVert = component2;
-    int nextVert = component2;
-    while (nextVert != vertices[nextVert]) {
-        nextVert = vertices[currentVert]; // переходим к следующему элементу
-        vertices[currentVert] = component1; // присваиваем вершине
-        currentVert = nextVert;
-    }*/
-    ////////////////////////////////////////////////////////////////////
-    vertices[component2] = component1;
-    weight += weight_;
-}
-
-/*
-int SpanTree::findComponent(int vert, bool isFirst) {
-    int currentVert = vert;
-    int nextVert = vert;
-    while (nextVert != vertices[nextVert]){
-        nextVert = vertices[currentVert]; // переходим к следующему элементу
-        //if (isFirst) {
-        vertices[currentVert] = vert; // присваиваем вершине
-        currentVert = nextVert;
-        //}
-    }
-    vertices[nextVert] = vert; // меняеем рута кмопоннеты
-
-    if (isFirst) {
-        return vert;
-    }
-    else{
-        return nextVert;
-    }
-}
-*/
-
-int SpanTree::findComponent(int vert) {
-    int currentVert = vert;
-    while (currentVert != vertices[currentVert]) {
-        currentVert = vertices[currentVert]; // переходим к следующему элементу
-    }
-    vertices[vert] = currentVert;
-    return currentVert;
-}
 
 int main() {
     int n_vertices;
@@ -189,9 +153,15 @@ int main() {
         edgeQueue.add(left_, right_, weight_);
     }
 
-    SpanTree spanTree = SpanTree(n_vertices);
+    DSU spanTree = DSU(n_vertices);
     int weight = spanTree.get(edgeQueue);
 
     std::cout << weight;
     return 0;
 }
+
+
+
+
+
+
