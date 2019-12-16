@@ -1,3 +1,0 @@
-/Users/grigorijpenkin/Documents/pr_a/algo/ex_3_3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/grigorijpenkin/Documents/pr_a/algo/ex_3_3/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/grigorijpenkin/Documents/pr_a/algo/ex_3_3/cmake-build-debug/CMakeFiles/ex_3_3.dir
