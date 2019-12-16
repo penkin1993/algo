@@ -50,6 +50,7 @@ private:
     std::unordered_map<int, std::pair<std::vector<int>, int>> graph_structure; // вершина, ребра, степень
 };
 
+
 Graph::Graph(int n_vertices) {
     for (int i = 0; i < n_vertices; i++) {
         graph_structure[i] = std::make_pair(std::vector<int>(0), -1);

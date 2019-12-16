@@ -59,7 +59,17 @@ std::vector<unsigned char> BitsWriter::GetResult(bool add_len) {
 
 class BitsReader {
 public:
-    BitsReader(std::vector<byte> &buffer) : buffer_(buffer) {}
+    explicit BitsReader(std::vector<byte> &buffer) : buffer_(buffer) {}
+
+    ~BitsReader() = default;
+
+    BitsReader(const BitsReader &) = default;
+
+    BitsReader(BitsReader &&) = default;
+
+    BitsReader &operator=(const BitsReader &) = delete;
+
+    BitsReader &operator=(BitsReader &&) = delete;
 
     bool ReadBit();
 
@@ -110,6 +120,16 @@ struct Node {
     Node(int weight_, byte symbol_, Node *left_, Node *right_)
             : weight(weight_), symbol(symbol_), left(left_), right(right_) {
     }
+
+    ~Node() = default;
+
+    Node(const Node &) = default;
+
+    Node(Node &&) = delete;
+
+    Node &operator=(const Node &) = delete;
+
+    Node &operator=(Node &&) = delete;
 };
 
 struct CompareWeight {
