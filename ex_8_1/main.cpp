@@ -12,12 +12,14 @@ g(k, i)=g(k, i-1) + i (mod m). m - степень двойки.
 
 
 Формат входных данных
-Каждая строка входных данных задает одну операцию над множеством. Запись операции состоит из типа операции и следующей за ним через пробел строки, над которой проводится операция.
+Каждая строка входных данных задает одну операцию над множеством.
+ Запись операции состоит из типа операции и следующей за ним через пробел строки, над которой проводится операция.
 Тип операции  – один из трех символов:
     +  означает добавление данной строки в множество;
     -  означает удаление  строки из множества;
     ?  означает проверку принадлежности данной строки множеству.
-При добавлении элемента в множество НЕ ГАРАНТИРУЕТСЯ, что он отсутствует в этом множестве. При удалении элемента из множества НЕ ГАРАНТИРУЕТСЯ, что он присутствует в этом множестве.
+При добавлении элемента в множество НЕ ГАРАНТИРУЕТСЯ, что он отсутствует в этом множестве.
+При удалении элемента из множества НЕ ГАРАНТИРУЕТСЯ, что он присутствует в этом множестве.
 Формат выходных данных
 Программа должна вывести для каждой операции одну из двух строк OK или FAIL.
 Для операции '?': OK, если элемент присутствует во множестве. FAIL иначе.
@@ -32,10 +34,11 @@ g(k, i)=g(k, i-1) + i (mod m). m - степень двойки.
 #include <string>
 #include <cstring>
 
+
 class HashTable {
 
 public:
-    explicit HashTable(size_t initial_size);
+    explicit HashTable(size_t initial_size, std::string nullKey);
 
     ~HashTable();
 
@@ -55,12 +58,24 @@ public:
 private:
     struct HashTableNode {
         HashTableNode() = default;
+        //explicit HashTableNode(std::string null_key) : key(null_key), null_key_(null_key) {}
 
-        std::string key = "__NULL__";
+        ~HashTableNode();
+
+        HashTableNode(const HashTableNode &) = delete;
+
+        HashTableNode(HashTableNode &&) = delete;
+
+        HashTableNode &operator=(const HashTableNode &) = delete;
+
+        HashTableNode &operator=(HashTableNode &&) = delete;
+
+        std::string key;
         bool is_filled = false;
     };
 
     HashTableNode *table = nullptr;
+    std::string nullKey_;
     int capacity;
     int size = 0;
 
@@ -71,9 +86,13 @@ private:
     void Expand();
 };
 
-HashTable::HashTable(size_t initial_size) {
+HashTable::HashTableNode::~HashTableNode() = default;
+
+HashTable::HashTable(size_t initial_size, std::string nullKey) {
     table = new HashTableNode[initial_size];
+    std::fill_n(table, initial_size, nullKey);
     capacity = initial_size;
+    nullKey_ = nullKey;
 }
 
 
@@ -120,7 +139,7 @@ bool HashTable::Remove(const std::string &key) {
 
     for (int i = 0; i < capacity; i++) {
         if (table[hash_index].key == key) {
-            table[hash_index].key = "__NULL__";
+            table[hash_index].key = nullKey_;
             size++;
             return true;
 
@@ -144,7 +163,7 @@ bool HashTable::Add(const std::string &key) {
         if (table[hash_index].key == key) {
             return false;
         }
-        if ((table[hash_index].key == "__NULL__") && table[hash_index].is_filled) {
+        if ((table[hash_index].key == nullKey_) && table[hash_index].is_filled) {
             add_index = &hash_index;
 
         } else if (!table[hash_index].is_filled) {
@@ -178,7 +197,7 @@ void HashTable::Expand() {
 
 
         for (int i = 0; i < old_capacity; i++) {
-            if (oldtable[i].key != "__NULL__") {
+            if (oldtable[i].key != nullKey_) {
                 Add(oldtable[i].key);
             }
         }
@@ -188,7 +207,7 @@ void HashTable::Expand() {
 
 
 int main() {
-    HashTable table(8);
+    HashTable table(8, "__NULL__");
     char command = ' ';
     std::string value;
     while (std::cin >> command >> value) {
