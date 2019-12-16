@@ -58,7 +58,7 @@ private:
 };
 
 template <class FApply>
-void Tree::GetDeque(const FApply& fapply) const{
+void Tree::GetDeque(const FApply& fApply) const{
     TreeNode *local_node = root;
     std::stack<TreeNode *> local_stack;
 
@@ -69,7 +69,7 @@ void Tree::GetDeque(const FApply& fapply) const{
         } else if (!local_stack.empty()) {
             local_node = local_stack.top();
             local_stack.pop();
-            fapply(local_node);
+            fApply(local_node);
 
             local_node = local_node->right;
         }
