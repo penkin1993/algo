@@ -44,21 +44,21 @@ RM = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/grigorijpenkin/Documents/pr_a/algo/ex_6_2
+CMAKE_SOURCE_DIR = /Users/grigorijpenkin/Documents/pr_a/algo/ex_8_1
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/grigorijpenkin/Documents/pr_a/algo/ex_6_2/cmake-build-debug
+CMAKE_BINARY_DIR = /Users/grigorijpenkin/Documents/pr_a/algo/ex_8_1/cmake-build-debug
 
 #=============================================================================
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/ex_6_2.dir/all
+all: CMakeFiles/ex_8_1.dir/all
 
 .PHONY : all
 
 # The main recursive "clean" target.
-clean: CMakeFiles/ex_6_2.dir/clean
+clean: CMakeFiles/ex_8_1.dir/clean
 
 .PHONY : clean
 
@@ -68,31 +68,31 @@ preinstall:
 .PHONY : preinstall
 
 #=============================================================================
-# Target rules for target CMakeFiles/ex_6_2.dir
+# Target rules for target CMakeFiles/ex_8_1.dir
 
 # All Build rule for target.
-CMakeFiles/ex_6_2.dir/all:
-	$(MAKE) -f CMakeFiles/ex_6_2.dir/build.make CMakeFiles/ex_6_2.dir/depend
-	$(MAKE) -f CMakeFiles/ex_6_2.dir/build.make CMakeFiles/ex_6_2.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/grigorijpenkin/Documents/pr_a/algo/ex_6_2/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target ex_6_2"
-.PHONY : CMakeFiles/ex_6_2.dir/all
+CMakeFiles/ex_8_1.dir/all:
+	$(MAKE) -f CMakeFiles/ex_8_1.dir/build.make CMakeFiles/ex_8_1.dir/depend
+	$(MAKE) -f CMakeFiles/ex_8_1.dir/build.make CMakeFiles/ex_8_1.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/grigorijpenkin/Documents/pr_a/algo/ex_8_1/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target ex_8_1"
+.PHONY : CMakeFiles/ex_8_1.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/ex_6_2.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/grigorijpenkin/Documents/pr_a/algo/ex_6_2/cmake-build-debug/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/ex_6_2.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/grigorijpenkin/Documents/pr_a/algo/ex_6_2/cmake-build-debug/CMakeFiles 0
-.PHONY : CMakeFiles/ex_6_2.dir/rule
+CMakeFiles/ex_8_1.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/grigorijpenkin/Documents/pr_a/algo/ex_8_1/cmake-build-debug/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/ex_8_1.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/grigorijpenkin/Documents/pr_a/algo/ex_8_1/cmake-build-debug/CMakeFiles 0
+.PHONY : CMakeFiles/ex_8_1.dir/rule
 
 # Convenience name for target.
-ex_6_2: CMakeFiles/ex_6_2.dir/rule
+ex_8_1: CMakeFiles/ex_8_1.dir/rule
 
-.PHONY : ex_6_2
+.PHONY : ex_8_1
 
 # clean rule for target.
-CMakeFiles/ex_6_2.dir/clean:
-	$(MAKE) -f CMakeFiles/ex_6_2.dir/build.make CMakeFiles/ex_6_2.dir/clean
-.PHONY : CMakeFiles/ex_6_2.dir/clean
+CMakeFiles/ex_8_1.dir/clean:
+	$(MAKE) -f CMakeFiles/ex_8_1.dir/build.make CMakeFiles/ex_8_1.dir/clean
+.PHONY : CMakeFiles/ex_8_1.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

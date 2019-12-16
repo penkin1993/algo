@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
-project(ex_6_2)
+project(ex_8_1)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(ex_6_2 main.cpp)
+add_executable(ex_8_1 main.cpp)

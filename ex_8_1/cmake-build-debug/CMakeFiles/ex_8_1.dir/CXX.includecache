@@ -6,11 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/Users/grigorijpenkin/Documents/pr_a/algo/ex_6_2/main.cpp
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_8_1/main.cpp
+assert.h
+-
 iostream
 -
-stack
+string
 -
-deque
+cstring
 -
 
