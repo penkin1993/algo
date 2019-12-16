@@ -6,13 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/Users/grigorijpenkin/Documents/pr_a/algo/ex_11_2/main.cpp
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_14_2/main.cpp
 iostream
 -
-unordered_map
--
-deque
--
 queue
+-
+vector
 -
 
