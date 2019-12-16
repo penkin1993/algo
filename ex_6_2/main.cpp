@@ -52,15 +52,13 @@ public:
     void Print(); // Печать всех значений
     void Add(int value); // Добавление значения в дерево
 private:
-    std::deque<TreeNode *> GetDeque(); // Иттератор для обхода
+    template <class FApply>
+    void GetDeque(const FApply& fapply) const; // Иттератор для обхода
     TreeNode *root = nullptr;
 };
 
-std::deque<TreeNode *> Tree::GetDeque() { // TODO:
-    std::deque<TreeNode *> final_deque;
-    if (!root) {
-        return final_deque;
-    }
+template <class FApply>
+void Tree::GetDeque(const FApply& fapply) const{
     TreeNode *local_node = root;
     std::stack<TreeNode *> local_stack;
 
@@ -71,27 +69,19 @@ std::deque<TreeNode *> Tree::GetDeque() { // TODO:
         } else if (!local_stack.empty()) {
             local_node = local_stack.top();
             local_stack.pop();
-            final_deque.push_back(local_node);
+            fapply(local_node);
+
             local_node = local_node->right;
         }
     }
-    return final_deque;
 }
 
-Tree::~Tree() { // TODO: Компаратор !!!
-    std::deque<TreeNode *> final_deque = GetDeque();
-    while (!final_deque.empty()) {
-        delete final_deque.front();
-        final_deque.pop_front();
-    }
+Tree::~Tree() {
+    GetDeque([](TreeNode * node) { delete node; });
 }
 
-void Tree::Print() { // TODO: Компаратор !!
-    std::deque<TreeNode *> final_deque = GetDeque();
-    while (!final_deque.empty()) {
-        std::cout << final_deque.front()->value << " ";
-        final_deque.pop_front();
-    }
+void Tree::Print(){
+    GetDeque([](TreeNode * node) { std::cout << node->value << " "; });
 }
 
 void Tree::Add(int value) {
