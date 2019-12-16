@@ -33,8 +33,25 @@ g(k, i)=g(k, i-1) + i (mod m). m - степень двойки.
 #include <string>
 #include <cstring>
 
-//template <class T, class THash>
-template<typename T>
+struct HashTableNode {
+    HashTableNode() = default;
+
+    ~HashTableNode();
+
+    HashTableNode(const HashTableNode &) = delete;
+
+    HashTableNode(HashTableNode &&) = delete;
+
+    HashTableNode &operator=(const HashTableNode &) = delete;
+
+    HashTableNode &operator=(HashTableNode &&) = delete;
+
+    std::string key;
+
+    bool is_filled = false;
+};
+
+template<class T, class THash>
 class HashTable {
 public:
     explicit HashTable(size_t initial_size, T nullKey);
@@ -56,26 +73,9 @@ public:
     bool Remove(const T &key);
 
 private:
-    struct HashTableNode {
-        HashTableNode() = default;
+    THash *table = nullptr; // TODO: !!!!
 
-        ~HashTableNode();
-
-        HashTableNode(const HashTableNode &) = delete;
-
-        HashTableNode(HashTableNode &&) = delete;
-
-        HashTableNode &operator=(const HashTableNode &) = delete;
-
-        HashTableNode &operator=(HashTableNode &&) = delete;
-
-        std::string key;
-        bool is_filled = false;
-    };
-
-    HashTableNode *table = nullptr;
-
-    std::string nullKey_; // TODO: Заменить тоже ????
+    std::string nullKey_;
 
     int capacity;
 
@@ -88,36 +88,35 @@ private:
     bool Expand();
 };
 
-template<class T>
-HashTable<T>::HashTableNode::~HashTableNode() = default;
+HashTableNode::~HashTableNode() = default;
 
-template<class T>
-HashTable<T>::HashTable(size_t initial_size, T nullKey) {
+template<class T, class HashTableNode>
+HashTable<T, HashTableNode>::HashTable(size_t initial_size, T nullKey) {
     table = new HashTableNode[initial_size];
     capacity = initial_size;
     nullKey_ = nullKey;
 }
 
-template<class T>
-HashTable<T>::~HashTable() {
+template<class T, class THash>
+HashTable<T, THash>::~HashTable() {
     delete[] table;
 }
 
-template <class T>
-int HashTable<T>::Hash(const char *str, int m) { // хэш
+template<class T, class THash>
+int HashTable<T, THash>::Hash(const char *str, int m) { // хэш
     int hash = 0;
     for (; *str != 0; ++str)
         hash = (hash * 41 + *str) % m;
     return hash;
 }
 
-template<class T>
-int HashTable<T>::HashProba(int hash_index, int i, int m) { // функция пробирования
+template<class T, class THash>
+int HashTable<T, THash>::HashProba(int hash_index, int i, int m) { // функция пробирования
     return (hash_index + i + 1) % m;
 }
 
-template <class T>
-bool HashTable<T>::Has(const T &key) const {
+template<class T, class THash>
+bool HashTable<T, THash>::Has(const T &key) const {
     assert(!key.empty());
 
     char cstr[key.length() + 1];
@@ -135,8 +134,8 @@ bool HashTable<T>::Has(const T &key) const {
     return false;
 }
 
-template <class T>
-bool HashTable<T>::Remove(const T &key) {
+template<class T, class THash>
+bool HashTable<T, THash>::Remove(const T &key) {
     assert(!key.empty());
 
     char cstr[key.length() + 1];
@@ -157,8 +156,8 @@ bool HashTable<T>::Remove(const T &key) {
     return false;
 }
 
-template <class T>
-bool HashTable<T>::Add(const T &key) {
+template<class T, class THash>
+bool HashTable<T, THash>::Add(const T &key) {
     assert(!key.empty());
     char cstr[key.length() + 1];
     strcpy(cstr, key.c_str()); // приведение строки к массиву
@@ -189,8 +188,8 @@ bool HashTable<T>::Add(const T &key) {
     return false;
 }
 
-template<typename T>
-bool HashTable<T>::Expand() {
+template<class T, class THash>
+bool HashTable<T, THash>::Expand() {
     if (size > (capacity * 3 / 4)) {
         size = 0;
 
@@ -215,7 +214,7 @@ bool HashTable<T>::Expand() {
 
 
 int main() {
-    HashTable<std::string> table(8, "__NULL__");
+    HashTable<std::string, HashTableNode> table(8, "__NULL__");
     char command = ' ';
     std::string value;
     while (std::cin >> command >> value) {
