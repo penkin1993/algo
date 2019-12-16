@@ -51,6 +51,16 @@ struct Edge {
     int weight;
 
     Edge(int left_, int right_, int weight_) : left(left_), right(right_), weight(weight_) {}
+
+    ~Edge() = delete;
+
+    Edge(const Edge &) = delete;
+
+    Edge(Edge &&) = delete;
+
+    Edge &operator=(const Edge &) = delete;
+
+    Edge &operator=(Edge &&) = delete;
 };
 
 struct CompareEdge {
@@ -64,7 +74,6 @@ class EdgeQueue {
 public:
     void add(int left_, int right_, int weight_);
 
-    //~EdgeQueue();
     std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *get();
 
 private:
@@ -82,6 +91,16 @@ std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *EdgeQueue::get() 
 class DSU {
 public:
     explicit DSU(size_t size);
+
+    ~DSU() = default;
+
+    DSU(const DSU &) = delete;
+
+    DSU(DSU &&) = default;
+
+    DSU &operator=(const DSU &) = delete;
+
+    DSU &operator=(DSU &&) = delete;
 
     int find(int element);
 

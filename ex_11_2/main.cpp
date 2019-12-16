@@ -22,9 +22,19 @@ n пар реберных вершин,
 Количество кратчайших путей от v к w.
  */
 
-class Graph { // TODO: добавить топ 5
+class Graph {
 public:
-    Graph(int n_vertices);
+    explicit Graph(int n_vertices);
+
+    ~Graph() = default;
+
+    Graph(const Graph &) = default;
+
+    Graph(Graph &&) = delete;
+
+    Graph &operator=(const Graph &) = delete;
+
+    Graph &operator=(Graph &&) = delete;
 
     void bfs(int s);
 

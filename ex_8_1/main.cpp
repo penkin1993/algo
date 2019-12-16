@@ -39,12 +39,6 @@ public:
 
     ~HashTable();
 
-    bool Has(const std::string &key) const;
-
-    bool Add(const std::string &key);
-
-    bool Remove(const std::string &key);
-
     HashTable(const HashTable &) = delete;
 
     HashTable(HashTable &&) = delete;
@@ -53,6 +47,11 @@ public:
 
     HashTable &operator=(HashTable &&) = delete;
 
+    bool Has(const std::string &key) const;
+
+    bool Add(const std::string &key);
+
+    bool Remove(const std::string &key);
 private:
     struct HashTableNode {
         HashTableNode() = default;

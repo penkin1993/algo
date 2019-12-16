@@ -37,7 +37,18 @@ struct TreeNode {
 
 class Tree {
 public:
+    Tree() = default;
+
     ~Tree();
+
+    Tree(const Tree &) = delete;
+
+    Tree(Tree &&) = delete;
+
+    Tree &operator=(const Tree &) = delete;
+
+    Tree &operator=(Tree &&) = delete;
+
     void Print(); // Печать всех значений
     void Add(int value); // Добавление значения в дерево
 private:
@@ -45,7 +56,29 @@ private:
     TreeNode *root = nullptr;
 };
 
-Tree::~Tree() {
+std::deque<TreeNode *> Tree::GetDeque() { // TODO:
+    std::deque<TreeNode *> final_deque;
+    if (!root) {
+        return final_deque;
+    }
+    TreeNode *local_node = root;
+    std::stack<TreeNode *> local_stack;
+
+    while ((local_node != nullptr) || (!local_stack.empty())) {
+        if (local_node != nullptr) {
+            local_stack.push(local_node);
+            local_node = local_node->left;
+        } else if (!local_stack.empty()) {
+            local_node = local_stack.top();
+            local_stack.pop();
+            final_deque.push_back(local_node);
+            local_node = local_node->right;
+        }
+    }
+    return final_deque;
+}
+
+Tree::~Tree() { // TODO: Компаратор !!!
     std::deque<TreeNode *> final_deque = GetDeque();
     while (!final_deque.empty()) {
         delete final_deque.front();
@@ -53,7 +86,7 @@ Tree::~Tree() {
     }
 }
 
-void Tree::Print() {
+void Tree::Print() { // TODO: Компаратор !!
     std::deque<TreeNode *> final_deque = GetDeque();
     while (!final_deque.empty()) {
         std::cout << final_deque.front()->value << " ";
@@ -82,29 +115,6 @@ void Tree::Add(int value) {
             local_node = local_node->right;
         }
     }
-}
-
-
-std::deque<TreeNode *> Tree::GetDeque() {
-    std::deque<TreeNode *> final_deque;
-    if (!root) {
-        return final_deque;
-    }
-    TreeNode *local_node = root;
-    std::stack<TreeNode *> local_stack;
-
-    while ((local_node != nullptr) || (!local_stack.empty())) {
-        if (local_node != nullptr) {
-            local_stack.push(local_node);
-            local_node = local_node->left;
-        } else if (!local_stack.empty()) {
-            local_node = local_stack.top();
-            local_stack.pop();
-            final_deque.push_back(local_node);
-            local_node = local_node->right;
-        }
-    }
-    return final_deque;
 }
 
 
