@@ -39,16 +39,18 @@ void getShiftArray(std::vector<char> &input_str, std::vector<int> &outputShiftAr
 };
 
 bool findRows(std::vector<char> &inputStr, std::vector<int> &outputShiftArray,
-              int &shift_index, char & symbol, int &symbol_index, std::vector<int> &rowIndex) {
+              int &shift_index, char & symbol, int &symbol_index, std::vector<int> &findIndex) {
     if (symbol == inputStr[shift_index]) {
         symbol_index++;
         shift_index++;
         if (shift_index == inputStr.size()) {
-            rowIndex.push_back(symbol_index - inputStr.size());
-            return true;
+            findIndex.push_back(symbol_index - inputStr.size());
         }
-        else if (shift_index == 0){
-            symbol_index ++;
+        return true;
+    }
+    else{
+        if (shift_index == 0){
+            symbol_index++;
             return true;
         }
         else{
@@ -89,32 +91,43 @@ int main() {
     //}
     int symbol_index = 0;
     int shift_index = 0;
-    std::vector<int> rowIndex;
+    std::vector<int> findIndex;
     bool read_next = true;
+    symbol = ' ';
 
     while (symbol != '\n') //Считывание в массив подстроки
     {
-        if(read_next) {
-            std::cin.get(symbol); // TODO: Check the last symbol !!!!!!!
+        //std::cout << shift_index;
+        if (read_next) {
+            std::cin.get(symbol);
+            std::cout << symbol;
         }
         read_next = findRows(inputStr, outputShiftArray, shift_index, symbol,
-                symbol_index, rowIndex);
+                symbol_index, findIndex);
     } // TODO: Можно сразу писать !!!
 
-    for (int i = 0; i < rowIndex.size(); i++){
-    std::cout << inputStr[i];
-        std::cout << rowIndex[i];
+
+    for (int i = 0; i < findIndex.size(); i++){
+        std::cout << findIndex[i] << " ";
     }
+
 
     return 0;
 }
 
 /*
-abbaabbab
+abcabd
+abcabeabcabcabd
+9
 
 aba
 abacababa
+
+0 4 6
 */
+
+
+
 
 
 
