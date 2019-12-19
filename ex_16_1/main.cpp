@@ -8,11 +8,6 @@
 Формат выходного файла
 Позиции вхождения шаблона в строке.
 Время: 100мс, память 3Mb.ц
-stdin
-stdout
-aba
-abacababa
-0 4 6
 */
 
 #include <iostream>
@@ -74,21 +69,7 @@ int main() {
         inputStr.push_back(symbol);
         outputShiftArray.push_back(0);
     }
-
-    //std::cout << inputStr.size() << "\n";
-    //std::cout << outputShiftArray.size() << "\n";
-
     getShiftArray(inputStr, outputShiftArray);
-
-    //for (int i = 0; i < inputStr.size(); i++){
-    //    std::cout << inputStr[i];
-    //}
-    //std::cout << "\n";
-
-    //for (int i = 0; i < outputShiftArray.size(); i++){
-    //std::cout << inputStr[i];
-    //    std::cout << outputShiftArray[i];
-    //}
     int symbol_index = 0;
     int shift_index = 0;
     std::vector<int> findIndex;
@@ -97,14 +78,13 @@ int main() {
 
     while (symbol != '\n') //Считывание в массив подстроки
     {
-        //std::cout << shift_index;
         if (read_next) {
             std::cin.get(symbol);
             std::cout << symbol;
         }
         read_next = findRows(inputStr, outputShiftArray, shift_index, symbol,
                 symbol_index, findIndex);
-    } // TODO: Можно сразу писать !!!
+    }
 
 
     for (int i = 0; i < findIndex.size(); i++){
@@ -122,8 +102,11 @@ abcabeabcabcabd
 
 aba
 abacababa
-
 0 4 6
+
+
+aba
+mababamrabab
 */
 
 
