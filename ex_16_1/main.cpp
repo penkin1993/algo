@@ -56,8 +56,6 @@ bool findRows(std::vector<char> &inputStr, std::vector<int> &outputShiftArray,
 }
 
 
-
-
 int main() {
     char symbol = ' ';
     std::vector<char> inputStr;
@@ -80,15 +78,14 @@ int main() {
     {
         if (read_next) {
             std::cin.get(symbol);
-            std::cout << symbol;
         }
         read_next = findRows(inputStr, outputShiftArray, shift_index, symbol,
                 symbol_index, findIndex);
     }
 
 
-    for (int i = 0; i < findIndex.size(); i++){
-        std::cout << findIndex[i] << " ";
+    for (int i : findIndex){
+        std::cout << i << " ";
     }
 
 
