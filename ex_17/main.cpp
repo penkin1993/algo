@@ -44,13 +44,13 @@ private:
     static std::pair<bool, bool> remove(
             std::shared_ptr<Node> &node, const std::string &key, int current_index);
 
-    static void defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque);
+    void defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque);
 };
 
 Trie::Trie() {
     root = std::make_shared<Node>();
-    std::shared_ptr<Node> pw = root->pw.lock();
-    pw = root;
+    root->pw = root->pw.lock();
+    root->pw = root;
 }
 
 bool Trie::Has(const std::string &key) const {
@@ -69,8 +69,8 @@ bool Trie::Add(const std::string &key) {
         auto next = current->go.find(symbol);
         if (next == current->go.end()) {
             current = current->go[symbol] = std::make_shared<Node>();
-            std::shared_ptr<Node> pw = current->pw.lock(); // Также добавляем ссылку на root
-            pw = root;
+            current->pw = current->pw.lock(); // Также добавляем ссылку на root
+            current->pw = root;
         } else {
             current = next->second;
         }
@@ -159,13 +159,23 @@ void Trie::DefLink() {
         }
     }
     defLink(root_deque);
-    // TODO : Print Указатели pw
 
-
+    /*
+    for (const auto& iter : root->go)
+    {
+        for (const auto& iter_child: iter.second->go){
+            std::cout << iter_child.first << "\n";
+        }
+    }
+     */
 }
 
+
+
+
+
 void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque) {
-    if (!root_deque.empty()) {
+    while (!root_deque.empty()) {
         auto element = root_deque.back();
         root_deque.pop_back();
 
@@ -176,10 +186,35 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
         assert(root_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
         assert(current_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
 
-        if (root_->go.count(symbol)) { // Проверить есть ли в go char
-            current_->pw = root_->go[symbol];// Если есть, то меняем ее
-            //    }
-        }
+
+
+
+        std::shared_ptr<Node> ref = root_->pw.lock();
+        std::cout << symbol << "\n";
+
+        do {
+            if (ref->go.count(symbol)){ // Если существует путь по нужному ребру
+                current_->pw = ref->go[symbol];
+                ref = root;
+                std::cout << symbol << "\n";
+                std::cout << "\n";
+            }
+            else{
+               ref = ref->pw.lock();
+            }
+        } while (ref != root); // Пока не дойдем до корня
+
+        // TODO:: Неправильные ссылки !!!
+        // TODO:: Первый раз нарушается на самом правом i
+        // TODO:: Затем из-за этого не выводится и j
+
+
+
+
+
+
+
+
         for (const auto &iter : current_->go) // добавить в очередь детей !!!
         {
             root_deque.push_front(std::make_tuple(current_, iter.first, iter.second)); // обход дочерних вершин
