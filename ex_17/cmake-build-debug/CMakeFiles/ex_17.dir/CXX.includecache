@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/grigorijpenkin/Documents/pr_a/algo/ex_17/main.cpp
+iostream
+-
+map
+-
+memory
+-
+vector
+-
+deque
+-
+
