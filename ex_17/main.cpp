@@ -6,8 +6,9 @@
 
 struct Node {
     std::map<char, std::shared_ptr<Node>> go;
-    std::weak_ptr<Node> pw;
+    std::shared_ptr<Node> pw; // TODO change weak_ptr
     bool is_terminal = false;
+    int node_num = 0;
 };
 
 class Trie {
@@ -35,6 +36,7 @@ public:
     void DefLink();
 
 private:
+    int counter = 0;
     std::shared_ptr<Node> root;
 
     static void print(const std::shared_ptr<Node> &node, const std::string &current);
@@ -49,7 +51,7 @@ private:
 
 Trie::Trie() {
     root = std::make_shared<Node>();
-    root->pw = root->pw.lock();
+    //root->pw = root->pw.lock();
     root->pw = root;
 }
 
@@ -69,8 +71,12 @@ bool Trie::Add(const std::string &key) {
         auto next = current->go.find(symbol);
         if (next == current->go.end()) {
             current = current->go[symbol] = std::make_shared<Node>();
-            current->pw = current->pw.lock(); // Также добавляем ссылку на root
+            //current->pw = current->pw.lock(); // Также добавляем ссылку на root
             current->pw = root;
+            counter++;
+            //std::cout << symbol << " " << counter << "\n";
+            current->node_num = counter;
+
         } else {
             current = next->second;
         }
@@ -170,10 +176,6 @@ void Trie::DefLink() {
      */
 }
 
-
-
-
-
 void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque) {
     while (!root_deque.empty()) {
         auto element = root_deque.back();
@@ -186,33 +188,34 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
         assert(root_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
         assert(current_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
 
+        std::shared_ptr<Node>ref = root_->pw; // TODO .lock();
 
-
-
-        std::shared_ptr<Node> ref = root_->pw.lock();
-        std::cout << symbol << "\n";
+        //std::cout << root_->pw->node_num << " ";
+        //std::cout << root_->node_num << " ";
+        //std::cout << symbol << " ";
+        //std::cout << current_->pw->node_num << " ";
+        //std::cout << current_->node_num << "\n";
 
         do {
             if (ref->go.count(symbol)){ // Если существует путь по нужному ребру
                 current_->pw = ref->go[symbol];
                 ref = root;
-                std::cout << symbol << "\n";
-                std::cout << "\n";
             }
             else{
-               ref = ref->pw.lock();
+               ref = ref->pw; // TODO .lock();
+                if (ref->go.count(symbol)) { // Если существует путь по нужному ребру
+                    current_->pw = ref->go[symbol];
+                    ref = root;
+                }
             }
         } while (ref != root); // Пока не дойдем до корня
 
-        // TODO:: Неправильные ссылки !!!
-        // TODO:: Первый раз нарушается на самом правом i
-        // TODO:: Затем из-за этого не выводится и j
 
-
-
-
-
-
+        //std::cout << root_->pw->node_num << " ";
+        //std::cout << root_->node_num << " ";
+        //std::cout << symbol << " ";
+        //std::cout << current_->pw->node_num << " ";
+        //std::cout << current_->node_num << "\n  \n";
 
 
         for (const auto &iter : current_->go) // добавить в очередь детей !!!
@@ -222,12 +225,22 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
     }
 }
 
+// TODO: Изменить нумерацию по словам !!!!
+
+// TODO: Ввести поле состояния
+
+// TODO: Ввести функцию перехода (при чтении очедерной буквы) !!!
+
+// TODO: Нумерация по встречаемости в тексте
+
+// TODO: Вернуть weak_ptr !!!!
+
+// 3. Алгоритм обхода. 60
+// 4. Финальный алгоритм. 60
 
 
-// TODO : Ввести поле состояния
-
-// TODO : Ввести функцию перехода (при чтении очедерной буквы) !!!
-
+// TODO : 0. Продумать весь алгоритм (решение задачи + алгоритм поиска !!!)
+// TODO : 3. Релизовать второй этап !!!
 
 
 
@@ -259,12 +272,5 @@ int main() {
     return 0;
 }
 
-
-// 3. Алгоритм обхода. 60
-// 4. Финальный алгоритм. 60
-
-
-// TODO : 0. Продумать весь алгоритм (решение задачи + алгоритм поиска !!!)
-// TODO : 3. Релизовать второй этап !!!
 
 
