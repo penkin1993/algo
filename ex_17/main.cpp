@@ -8,7 +8,8 @@ struct Node {
     std::map<char, std::shared_ptr<Node>> go;
     std::shared_ptr<Node> pw; // TODO change weak_ptr
     bool is_terminal = false;
-    int node_num = 0;
+    std::vector<int> word_num; // id терминальных врешин
+    std::map<char, std::shared_ptr<Node>> cash_pw;
 };
 
 class Trie {
@@ -35,9 +36,12 @@ public:
 
     void DefLink();
 
+    std::vector<int> Step(char symbol); // основной цикл алгоритма
+
 private:
     int counter = 0;
     std::shared_ptr<Node> root;
+    std::shared_ptr<Node> current_state; // состояние автомата
 
     static void print(const std::shared_ptr<Node> &node, const std::string &current);
 
@@ -47,12 +51,15 @@ private:
             std::shared_ptr<Node> &node, const std::string &key, int current_index);
 
     void defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque);
+
+    bool step(std::vector<int> & symbols_id, char symbol); // вспомогательная функция основного алгоритма
 };
 
 Trie::Trie() {
     root = std::make_shared<Node>();
     //root->pw = root->pw.lock();
     root->pw = root;
+    current_state = root;
 }
 
 bool Trie::Has(const std::string &key) const {
@@ -75,8 +82,6 @@ bool Trie::Add(const std::string &key) {
             current->pw = root;
             counter++;
             //std::cout << symbol << " " << counter << "\n";
-            current->node_num = counter;
-
         } else {
             current = next->second;
         }
@@ -84,6 +89,8 @@ bool Trie::Add(const std::string &key) {
     // Если терминальная, значит, строка уже есть.
     if (current->is_terminal) return false;
     current->is_terminal = true;
+    counter++;
+    current->word_num.push_back(counter); // номер слова
     return true;
 }
 
@@ -208,6 +215,11 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
                     ref = root;
                 }
             }
+
+            for (int id : current_->pw->word_num){ // родительские терминальные варшины (имеют один общий суффикс)
+                current_->word_num.push_back(id); // TODO: TEST !!!
+            }
+
         } while (ref != root); // Пока не дойдем до корня
 
 
@@ -225,24 +237,62 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
     }
 }
 
+std::vector<int> Trie::Step(char symbol){
+    bool is_finished = false;
+    std::vector<int> symbols_id;
+
+    std::shared_ptr<Node> old_state = current_state; // запоминаем для hash_map
+
+    while (!is_finished) {
+        is_finished = step(symbols_id, symbol);
+        // Пытаемся пойти вниз.
+        //    Если возможно, то идем
+        //       Если вершина терминальная, то добавляем ее индексы в output
+
+        if (!is_finished){
+            current_state = current_state->pw; // перешли по суффиксной ссылке
+        }
+
+        if(current_state == root){
+            is_finished = true; //дощли до корня
+        }
+        // Если нет, то переходим по суффиусным ссылкам, и пытаемся пойти вниз
+        // Повторяем рекурсивно верхний цикл
+        // Пытаемся пока не дошли до корня
+    }
+    // Запоминаем вершину перехода в cash_pw
+    old_state->cash_pw[symbol] = current_state;
+
+    return symbols_id;
+}
+
+bool Trie::step(std::vector<int> & symbols_id, char symbol){
+    if (current_state->go.count(symbol)) { // нужен ли edge ???
+        current_state = current_state->go[symbol];
+        //if (current_state->is_terminal){
+        for (int id : current_state->word_num){ // перешли в новое состояние и запушили id слов
+            symbols_id.push_back(id);
+        //    }
+        }
+        return true;
+    }
+    return false;
+}
+
+
+// TODO: 1. Алгоритм обхода
+// TODO: 2. Алгоритм добавления метки позщиции слова
+// TODO: 3. Шаг 2. Подсчет и финальные позиции
+
+
 // TODO: Изменить нумерацию по словам !!!!
-
-// TODO: Ввести поле состояния
-
-// TODO: Ввести функцию перехода (при чтении очедерной буквы) !!!
 
 // TODO: Нумерация по встречаемости в тексте
 
 // TODO: Вернуть weak_ptr !!!!
 
-// 3. Алгоритм обхода. 60
-// 4. Финальный алгоритм. 60
-
 
 // TODO : 0. Продумать весь алгоритм (решение задачи + алгоритм поиска !!!)
-// TODO : 3. Релизовать второй этап !!!
-
-
 
 
 int main() {
