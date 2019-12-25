@@ -52,7 +52,8 @@ private:
 
     void defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque);
 
-    bool step(std::vector<int> & symbols_id, char symbol); // вспомогательная функция основного алгоритма
+    bool step_down(std::vector<int> & symbols_id, char symbol); // вспомогательная функция основного алгоритма
+    bool step_link(std::vector<int> & symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
 };
 
 Trie::Trie() {
@@ -244,50 +245,53 @@ std::vector<int> Trie::Step(char symbol){
     std::shared_ptr<Node> old_state = current_state; // запоминаем для hash_map
 
     while (!is_finished) {
-        is_finished = step(symbols_id, symbol);
+        is_finished = step_down(symbols_id, symbol);
         // Пытаемся пойти вниз.
         //    Если возможно, то идем
         //       Если вершина терминальная, то добавляем ее индексы в output
-
         if (!is_finished){
-            current_state = current_state->pw; // перешли по суффиксной ссылке
-        }
-
-        if(current_state == root){
-            is_finished = true; //дощли до корня
+            is_finished = step_link(symbols_id, symbol);
         }
         // Если нет, то переходим по суффиусным ссылкам, и пытаемся пойти вниз
         // Повторяем рекурсивно верхний цикл
         // Пытаемся пока не дошли до корня
     }
     // Запоминаем вершину перехода в cash_pw
-    old_state->cash_pw[symbol] = current_state;
-
+    old_state->cash_pw[symbol] = current_state; // TODO: Перезаписовать ???
     return symbols_id;
 }
 
-bool Trie::step(std::vector<int> & symbols_id, char symbol){
+bool Trie::step_down(std::vector<int> & symbols_id, char symbol){
     if (current_state->go.count(symbol)) { // нужен ли edge ???
         current_state = current_state->go[symbol];
-        //if (current_state->is_terminal){
         for (int id : current_state->word_num){ // перешли в новое состояние и запушили id слов
             symbols_id.push_back(id);
-        //    }
         }
         return true;
     }
     return false;
 }
 
+bool Trie::step_link(std::vector<int> & symbols_id, char symbol) {
+    if (current_state->cash_pw.count(symbol)){ // если есть длнная ссылка в кэше
+        for (int id : current_state->word_num){ // перешли в новое состояние и запушили id слов
+            symbols_id.push_back(id);
+        }
+        return true; // прошли по длинной суффиксной ссылке
+    } else {
+        current_state = current_state->pw; // прошли по суффиксной ссылке
+        if (current_state != root){
+            return false;
+        } else return true;
+    }
+}
 
-// TODO: 1. Алгоритм обхода
-// TODO: 2. Алгоритм добавления метки позщиции слова
+
+
+
+
 // TODO: 3. Шаг 2. Подсчет и финальные позиции
 
-
-// TODO: Изменить нумерацию по словам !!!!
-
-// TODO: Нумерация по встречаемости в тексте
 
 // TODO: Вернуть weak_ptr !!!!
 
