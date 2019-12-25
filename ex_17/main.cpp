@@ -3,13 +3,15 @@
 #include <memory>
 #include <vector>
 #include <deque>
+#include <unordered_map>
 
 struct Node {
     std::map<char, std::shared_ptr<Node>> go;
     std::shared_ptr<Node> pw; // TODO change weak_ptr
     bool is_terminal = false;
     std::vector<int> word_num; // id терминальных врешин
-    std::map<char, std::shared_ptr<Node>> cash_pw;
+    std::unordered_map<char, std::shared_ptr<Node>> cash_pw;
+    int node_num; // TODO temp
 };
 
 class Trie {
@@ -40,6 +42,9 @@ public:
 
 private:
     int counter = 0;
+    int counter_node_num = 0;
+
+
     std::shared_ptr<Node> root;
     std::shared_ptr<Node> current_state; // состояние автомата
 
@@ -81,7 +86,8 @@ bool Trie::Add(const std::string &key) {
             current = current->go[symbol] = std::make_shared<Node>();
             //current->pw = current->pw.lock(); // Также добавляем ссылку на root
             current->pw = root;
-            counter++;
+            counter_node_num++; // TODO temp
+            current->node_num = counter_node_num; // TODO temp
             //std::cout << symbol << " " << counter << "\n";
         } else {
             current = next->second;
@@ -92,6 +98,8 @@ bool Trie::Add(const std::string &key) {
     current->is_terminal = true;
     counter++;
     current->word_num.push_back(counter); // номер слова
+    //std::cout << key << " ";
+    //std::cout << current->go.size() << "\n";
     return true;
 }
 
@@ -138,7 +146,7 @@ void Trie::print(const std::shared_ptr<Node> &node, const std::string &current) 
     }
 }
 
-void list_fill(std::vector<std::string> &word_dict, std::string &str) {
+void list_fill(std::deque<std::string> &word_dict, std::string &str) {
     bool new_symbol = false;
     std::string current_string;
 
@@ -218,17 +226,20 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
             }
 
             for (int id : current_->pw->word_num){ // родительские терминальные варшины (имеют один общий суффикс)
-                current_->word_num.push_back(id); // TODO: TEST !!!
+                current_->word_num.push_back(id);
             }
 
         } while (ref != root); // Пока не дойдем до корня
 
-
-        //std::cout << root_->pw->node_num << " ";
         //std::cout << root_->node_num << " ";
+        //std::cout << root_->pw->node_num << " ";
+        //std::cout << current_->node_num << " ";
         //std::cout << symbol << " ";
-        //std::cout << current_->pw->node_num << " ";
-        //std::cout << current_->node_num << "\n  \n";
+        //for (int num : current_->word_num){
+        //    std::cout << num;
+        //}
+        //std::cout << "\n  \n";
+        //std::cout << current_->pw->node_num << "\n  \n";
 
 
         for (const auto &iter : current_->go) // добавить в очередь детей !!!
@@ -238,33 +249,60 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
     }
 }
 
-std::vector<int> Trie::Step(char symbol){ // TODO: TEST !!!
+std::vector<int> Trie::Step(char symbol){
     bool is_finished = false;
     std::vector<int> symbols_id;
 
+    //std::cout << current_state->node_num << " " << symbol << " ";
+
     std::shared_ptr<Node> old_state = current_state; // запоминаем для hash_map
 
+    //std::cout << symbol << " ";
+    //std::cout << current_state->go.size() << "\n";
+
     while (!is_finished) {
+        //std :: cout << "!!!!!1 \n";
+        //std :: cout << current_state->node_num << "\n";
         is_finished = step_down(symbols_id, symbol);
+        //std :: cout << "!!!!!2 \n";
+        //std::cout << is_finished  << current_state->node_num << "\n";
+        //std :: cout << "!!!!!3 \n";
+        //std :: cout << "\n";
+
         // Пытаемся пойти вниз.
         //    Если возможно, то идем
         //       Если вершина терминальная, то добавляем ее индексы в output
         if (!is_finished){
-            is_finished = step_link(symbols_id, symbol);
+            is_finished = step_link(symbols_id, symbol); // TODO: Можно сразу пытаться перейти по длинным суффиксным ссылкам !!!
         }
         // Если нет, то переходим по суффиусным ссылкам, и пытаемся пойти вниз
         // Повторяем рекурсивно верхний цикл
         // Пытаемся пока не дошли до корня
     }
     // Запоминаем вершину перехода в cash_pw
-    old_state->cash_pw[symbol] = current_state; // TODO: Перезаписывать ???
+    old_state->cash_pw[symbol] = current_state;
+
+    //std::cout << old_state->node_num << " " << symbol << " ";
+    //std::cout << current_state->node_num << "\n";
+
     return symbols_id;
 }
 
 bool Trie::step_down(std::vector<int> & symbols_id, char symbol){
-    if (current_state->go.count(symbol)) { // нужен ли edge ???
+    //std :: cout << "step_down \n";
+    if (current_state->go.count(symbol)) {
+        /*
+        std::cout << " \n DOWN \n";
+        for (auto it = current_state->go.cbegin(); it != current_state->go.cend(); ++it)
+        {
+            std::cout << it->first << "\n";
+        }
+        std::cout << "DOWN \n \n";
+        */
+
         current_state = current_state->go[symbol];
         for (int id : current_state->word_num){ // перешли в новое состояние и запушили id слов
+            //std::cout << " push_down \n";
             symbols_id.push_back(id);
         }
         return true;
@@ -274,19 +312,23 @@ bool Trie::step_down(std::vector<int> & symbols_id, char symbol){
 
 bool Trie::step_link(std::vector<int> & symbols_id, char symbol) {
     if (current_state->cash_pw.count(symbol)){ // если есть длнная ссылка в кэше
+        current_state = current_state->cash_pw[symbol];
         for (int id : current_state->word_num){ // перешли в новое состояние и запушили id слов
+            //std::cout << " push_link \n";
             symbols_id.push_back(id);
         }
+       // std::cout << "long_link" << "\n";
         return true; // прошли по длинной суффиксной ссылке
     } else {
         current_state = current_state->pw; // прошли по суффиксной ссылке
         if (current_state != root){
             return false;
-        } else return true;
+        } else {
+            step_down(symbols_id, symbol);
+            return true;
+        }
     }
 }
-
-
 
 
 
@@ -312,12 +354,12 @@ int main() {
     std::string str;
     getline(std::cin, str);
 
-    std::vector<std::string> words_list;
+    std::deque<std::string> words_list;
     list_fill(words_list, str);
 
     while (!words_list.empty()) {
-        trie.Add(words_list.back());
-        words_list.pop_back();
+        trie.Add(words_list.back()); // TODO: front
+        words_list.pop_back(); // TODO: pop_front
     }
 
     trie.DefLink();
@@ -329,11 +371,18 @@ int main() {
     while (symbol != '\n') //Считывание в массив подстроки
     {
         std::cin.get(symbol);
-        out = trie.Step(symbol);
+        out = trie.Step(symbol); // TODO: Print на один больше !!!
         std::cout << out.size();
     }
     return 0;
 }
+/*
+ab??aba
+ababacaba
+
+aa??bab?cbaa?
+aabbbabbcbaabaabbbabbcbaab
+ */
 
 
 
