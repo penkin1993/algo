@@ -238,7 +238,7 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
     }
 }
 
-std::vector<int> Trie::Step(char symbol){
+std::vector<int> Trie::Step(char symbol){ // TODO: TEST !!!
     bool is_finished = false;
     std::vector<int> symbols_id;
 
@@ -257,7 +257,7 @@ std::vector<int> Trie::Step(char symbol){
         // Пытаемся пока не дошли до корня
     }
     // Запоминаем вершину перехода в cash_pw
-    old_state->cash_pw[symbol] = current_state; // TODO: Перезаписовать ???
+    old_state->cash_pw[symbol] = current_state; // TODO: Перезаписывать ???
     return symbols_id;
 }
 
@@ -307,6 +307,7 @@ int main() {
     // std::cout << trie.Has("aaaa") << "\n";
 
     // abdk?abchijn?chnit?ijabdf?ijaij
+    // c?bc?abc?
 
     std::string str;
     getline(std::cin, str);
@@ -320,9 +321,17 @@ int main() {
     }
 
     trie.DefLink();
-    trie.Print();
+    //trie.Print();
 
+    std::vector<int> out;
+    char symbol = ' ';
 
+    while (symbol != '\n') //Считывание в массив подстроки
+    {
+        std::cin.get(symbol);
+        out = trie.Step(symbol);
+        std::cout << out.size();
+    }
     return 0;
 }
 
