@@ -174,8 +174,8 @@ void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::share
         char symbol = std::get<1>(element);
         std::shared_ptr<Node> current_ = std::get<2>(element);
 
-        assert(root_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
-        assert(current_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
+        //assert(root_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
+        //assert(current_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
 
         std::shared_ptr<Node> ref = root_->pw; // TODO .lock();
 
