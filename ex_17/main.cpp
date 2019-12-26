@@ -395,8 +395,10 @@ int main() {
 
     for (int i = 0; i < words_id.size(); i++){
         trie.Add(words_list.front(), i);
+        std::cout << words_id[i] << " ID" << "\n";
         words_list.pop_front();
     }
+
 
     trie.DefLink();
     //trie.Print();
@@ -410,22 +412,12 @@ int main() {
         out = trie.Step(symbol); // TODO: Print на один больше !!!
         std::cout << out.size();
     }
-
-
-
-
-
-
-
-
-
-
-
-
     return 0;
 }
 
 // TODO: Вернуть weak_ptr !!!!
+
+// TODO: Вопросы вначале и конце !!!
 
 /*
 ab??aba
