@@ -303,65 +303,16 @@ bool Trie::step_link(std::vector<int> &symbols_id, char symbol) {
     }
 }
 
-class Pattern { // TODO: Првило 5 !!!
-public:
-    Pattern(std::deque<int> shifts_, int state_size_) :
-            shifts(shifts_), state_size(state_size_) {
-        words_count = shifts_.size();
-        for (int i = 0; i < state_size; i++) {
-            state.push_back(0);
-        }
-    };
-
-    void Step(std::vector<int> &symbols_id);
-
-    void Print(int left_q, int right_q);
-
-private:
-    int counter = 0;
-    int words_count; // сколько всего слов
-    int state_size; // длина входной строки веместе со всеми ???
-    const std::deque<int> shifts; // на сколько нужно сдвигать
-    std::deque<int> state; // текущая очередь состояний
-    std::deque<int> answer; // то, что возвращать в ответ
-};
-
-void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
-    // 1. пушим и вставляем символы в строке
-    // 2. Проверяем первый.
-    //    Если все ок, то добавляем индекс в конец
-    // выкидываем первый и вставляем 0 в конец
-    int add_id;
-    while (!symbols_id.empty()) {
-        add_id = symbols_id.back();
-        symbols_id.pop_back();
-        state[shifts[add_id]]++;
-    }
-
-    if (state.back() == words_count) {
-        answer.push_back(counter - state_size);
-    }
-    state.pop_back();
-    state.push_front(0);
-    counter++;
-}
-
-
-
-
-
-
-
-void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string & str,
-        int & left_q, int & right_q) {
+void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str,
+               int &left_q, int &right_q) {
     bool new_symbol = false;
     std::string current_string;
-    int counter = 0;
+    int counter = -1;
 
     for (char symbol : str) {
         if (symbol == '?') {
             left_q++;
-        } else{
+        } else {
             break;
         }
     }
@@ -388,20 +339,74 @@ void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std
 
     if (!current_string.empty()) {
         word_dict.push_back(current_string);
-        shifts_.push_back(counter -  counter_q);
+        shifts_.push_back(counter - counter_q);
     }
     //for (auto & i : word_dict){ // ??adasda??sadasd??
     //    std::cout << i << "\n";
     //}
 }
 
+class Pattern { // TODO: Првило 5 !!!
+public:
+    Pattern(std::deque<int> &shifts_, int state_size_) :
+            shifts(shifts_), state_size(state_size_) {
+        words_count = shifts_.size();
+        for (int i = 0; i < state_size; i++) {
+            state.push_back(0);
+        }
+    };
+
+    void Step(std::vector<int> &symbols_id);
+
+    void Print(int left_q, int right_q);
+
+private:
+    int counter = 1;
+    int words_count; // сколько всего слов
+    const int state_size; // длина входной строки веместе со всеми ???
+    const std::deque<int> &shifts; // на сколько нужно сдвигать
+    std::deque<int> state; // текущая очередь состояний
+    std::deque<int> answer; // то, что возвращать в ответ
+};
+
+void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
+    // 1. пушим и вставляем символы в строке
+    // 2. Проверяем первый.
+    //    Если все ок, то добавляем индекс в конец
+    // выкидываем первый и вставляем 0 в конец
+    int id;
+
+    while (!symbols_id.empty()) {
+        id = symbols_id.back();
+        //std::cout << id << " ";
+        symbols_id.pop_back();
+        state[shifts[id]]++;
+    }
+
+    //for (int i = 0; i < state.size(); i++){
+    //    std::cout << state[i] << " ";
+    //}
+    //std::cout << "\n";
+
+    if (state.back() == words_count) {
+        answer.push_back(counter - state_size);
+        //td::cout << answer.back() << "\n";
+    }
+    //std::cout << counter - state.back() << " ";
+    state.pop_back();
+    state.push_front(0);
+    counter++;
+}
+
 void Pattern::Print(int left_q, int right_q) { // TODO: check !!!!
     int ans;
     //std::cout << answer.size();
-    //std::cout << answer[0];
-    while (answer.empty()) {
+    //std::cout << answer[0] << answer[1];
+    //std::cout << answer.size();
+    while (!answer.empty()) {
         ans = answer.front();
-        if ((ans >=  left_q) && (ans <= counter - right_q)){
+        //std::cout << ans << " ";
+        if ((ans >= left_q) && (ans <= counter - right_q)) {
             std::cout << ans << " ";
         }
         answer.pop_front();
@@ -429,7 +434,7 @@ int main() {
 
     for (int i = 0; i < shifts_.size(); i++) {
         trie.Add(words_list.front(), i);
-        //std::cout << shifts_[i] << " ID" << "\n";
+        //std::cout << shifts_[i] << " " << "\n";
         words_list.pop_front();
     }
     trie.DefLink();
@@ -444,8 +449,12 @@ int main() {
     {
         std::cin.get(symbol);
         out = trie.Step(symbol); // TODO: На один больше !!!
-        pattern.Step(out);
         //std::cout << out.size();
+        //for (int i : out){
+        //   std::cout << i << " ";
+        //}
+        //std::cout << "\n";
+        pattern.Step(out);
     }
 
     pattern.Print(left_q, right_q);
@@ -458,7 +467,7 @@ int main() {
 ab??aba
 ababacaba
 
-????aa??bab?cbaa?????
+aa??bab?cbaa?
 aabbbabbcbaabaabbbabbcbaab
  */
 
