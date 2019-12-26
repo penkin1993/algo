@@ -30,7 +30,7 @@ public:
 
     bool Has(const std::string &key) const;
 
-    bool Add(const std::string &key);
+    bool Add(const std::string &key, int id);
 
     bool Remove(const std::string &key);
 
@@ -41,9 +41,7 @@ public:
     std::vector<int> Step(char symbol); // основной цикл алгоритма
 
 private:
-    int counter = 0;
     int counter_node_num = 0;
-
 
     std::shared_ptr<Node> root;
     std::shared_ptr<Node> current_state; // состояние автомата
@@ -78,7 +76,7 @@ bool Trie::Has(const std::string &key) const {
     return current->is_terminal;
 }
 
-bool Trie::Add(const std::string &key) {
+bool Trie::Add(const std::string &key, int id) {
     std::shared_ptr<Node> current = root;
     for (char symbol : key) {
         auto next = current->go.find(symbol);
@@ -96,8 +94,7 @@ bool Trie::Add(const std::string &key) {
     // Если терминальная, значит, строка уже есть.
     if (current->is_terminal) return false;
     current->is_terminal = true;
-    counter++;
-    current->word_num.push_back(counter); // номер слова
+    current->word_num.push_back(id); // номер слова
     //std::cout << key << " ";
     //std::cout << current->go.size() << "\n";
     return true;
@@ -144,31 +141,6 @@ void Trie::print(const std::shared_ptr<Node> &node, const std::string &current) 
     for (const auto go : node->go) {
         print(go.second, current + go.first);
     }
-}
-
-void list_fill(std::deque<std::string> &word_dict, std::string &str) {
-    bool new_symbol = false;
-    std::string current_string;
-
-    for (char symbol : str) {
-        if (symbol == '?') {
-            new_symbol = true;
-        } else if ((new_symbol) && (!current_string.empty())) {
-            word_dict.push_back(current_string);
-            current_string = "";
-        }
-        if (symbol != '?') {
-            current_string += symbol;
-            new_symbol = false;
-        }
-    }
-
-    if (!current_string.empty()) {
-        word_dict.push_back(current_string);
-    }
-    //for (auto & i : word_dict){ // ??adasda??sadasd??
-    //    std::cout << i << "\n";
-    //}
 }
 
 void Trie::DefLink() {
@@ -330,24 +302,87 @@ bool Trie::step_link(std::vector<int> & symbols_id, char symbol) {
     }
 }
 
+class Pattern{ // TODO: Првило 5 !!!
+public:
+    Pattern(std::vector<int> & shifts_, int state_size_):
+    shifts(shifts_), state_size(state_size_)
+    {
+        words_count = shifts_.size();
+        for (int i = 0; i < state_size; i++){
+            state.push_back(0);
+        }
+    };
+    void Step(std::vector<int> & symbols_id);
+    void Print();
 
+private:
+    int counter = 0;
+    int words_count; // сколько всего слов
+    int state_size;
+    const std::vector<int> shifts; // на сколько нужно сдвигать
+    std::deque<int> state; // текущая очередь состояний
+    std::deque<int> answer; // то, что возвращать в ответ
+};
 
-// TODO: 3. Шаг 2. Подсчет и финальные позиции
+void Pattern::Step(std::vector<int> & symbols_id){// TODO: Check Совпадают ли размеры ???
+    // 1. пушим и вставляем символы в строке
+    // 2. Проверяем первый.
+    //    Если все ок, то добавляем индекс в конец
+    // выкидываем первый и вставляем 0 в конец
+    int add_id;
+    while(!symbols_id.empty()){
+        add_id = symbols_id.back();
+        symbols_id.pop_back();
+        state[shifts[add_id]]++;
+    }
 
+    if(state.back() == words_count){
+        answer.push_back(counter - state_size);
+    }
+    state.pop_back();
+    state.push_front(0);
+    counter++;
+}
 
-// TODO: Вернуть weak_ptr !!!!
+void Pattern::Print() {
+    while (answer.empty()) {
+        std::cout << answer.front() << " ";
+        answer.pop_front();
+    }
+}
 
+void list_fill(std::deque<std::string> &word_dict, std::deque<int> & words_id, std::string &str) {
+    bool new_symbol = false;
+    std::string current_string;
+    int counter = 0;
 
-// TODO : 0. Продумать весь алгоритм (решение задачи + алгоритм поиска !!!)
+    for (char symbol : str) {
+        if (symbol == '?') {
+            new_symbol = true;
+        } else if ((new_symbol) && (!current_string.empty())) {
+            word_dict.push_back(current_string);
+            words_id.push_back(counter);
+            current_string = "";
+        }
+        if (symbol != '?') {
+            current_string += symbol;
+            new_symbol = false;
+        }
+        counter ++;
+    }
+
+    if (!current_string.empty()) {
+        word_dict.push_back(current_string);
+        words_id.push_back(counter);
+    }
+    //for (auto & i : word_dict){ // ??adasda??sadasd??
+    //    std::cout << i << "\n";
+    //}
+}
 
 
 int main() {
     Trie trie;
-    // trie.Add("aaa");
-    // trie.Add("aa");
-    // trie.Remove("aaa");
-    // std::cout << trie.Has("aaaa") << "\n";
-
     // abdk?abchijn?chnit?ijabdf?ijaij
     // c?bc?abc?
 
@@ -355,11 +390,12 @@ int main() {
     getline(std::cin, str);
 
     std::deque<std::string> words_list;
-    list_fill(words_list, str);
+    std::deque<int> words_id;
+    list_fill(words_list, words_id, str);
 
-    while (!words_list.empty()) {
-        trie.Add(words_list.back()); // TODO: front
-        words_list.pop_back(); // TODO: pop_front
+    for (int i = 0; i < words_id.size(); i++){
+        trie.Add(words_list.front(), i);
+        words_list.pop_front();
     }
 
     trie.DefLink();
@@ -374,8 +410,23 @@ int main() {
         out = trie.Step(symbol); // TODO: Print на один больше !!!
         std::cout << out.size();
     }
+
+
+
+
+
+
+
+
+
+
+
+
     return 0;
 }
+
+// TODO: Вернуть weak_ptr !!!!
+
 /*
 ab??aba
 ababacaba
