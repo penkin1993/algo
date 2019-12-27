@@ -409,7 +409,7 @@ void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {// TODO: Che
 
 void Pattern::Print(int left_q, int right_q) {
     int ans;
-    counter -= 1;
+    counter -= 2;
     if (words_count == 0){
         left_q = 0;
     }
@@ -420,15 +420,24 @@ void Pattern::Print(int left_q, int right_q) {
     while (!answer.empty()) {
         ans = answer.front() + left_q;
 
-        //std::cout << "ans " << ans << "\n";
-        //std::cout << left_q << " ";
-        //std::cout << right_q << " ";
+        //std::cout << "ans " << ans << " ";
+        //std::cout << "left_q "<<  left_q << " ";
+        //std::cout << "right_q " << right_q << " ";
+        //std::cout << "end " << counter - state_size - right_q << "\n";
         //std::cout << counter - state_size - right_q << "\n";
 
-        if ((ans >= 0) && (ans <= counter - state_size - right_q)) {
+
+
+
+        if ((ans >= 0) && (ans + state_size <= counter)) { // right_q
             std::cout << ans << " ";
-            //std::cout << "words_count " <<  << " words_count";
         }
+
+
+
+
+
+
         answer.pop_front();
     }
 
@@ -507,6 +516,14 @@ aaaaaaaaaaaaaaaa
 
 ??
 asdasdsad
+
+// TODO: Check !!
+??asd?s??
+asdasdasad
+
+TODO: Check !!!
+?bb???????????
+bbbaaaaaaaaaaa
 
 // TODO: Изменить read ???
 
