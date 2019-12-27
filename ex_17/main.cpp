@@ -418,7 +418,7 @@ void Pattern::Print(int left_q) {
     while (!answer.empty()) {
         ans = answer.front() + left_q;
 
-        //std::cout << "ans " << ans << " ";
+        //std::cout << "ans " << ans << " \n";
         //std::cout << "left_q "<<  left_q << " ";
         //std::cout << "right_q " << right_q << " ";
         //std::cout << "end " << counter - state_size - right_q << "\n";
@@ -431,12 +431,12 @@ void Pattern::Print(int left_q) {
     //std::cout << "c " << words_count << "\n";
 }
 
-
 int main() {
     Trie trie;
     std::string str;
     getline(std::cin, str);
-    int state_size_ = str.length(); // TODO: На один больше ???
+    int state_size_ = str.length();
+    //std::cout << state_size_;
 
     std::deque<std::string> words_list;
     std::deque<int> shifts_;
@@ -459,11 +459,13 @@ int main() {
 
     Pattern pattern = Pattern(shifts_, state_size_);
 
-    while (symbol != '\n') //Считывание в массив подстроки
+    for (;;) //Считывание в массив подстроки
     {
         std::cin.get(symbol);
-        out = trie.Step(symbol); // TODO: На один больше !!!
-        //std::cout << out.size();
+        if (symbol == '\n' || symbol == EOF)
+            break;
+        out = trie.Step(symbol);
+        std::cout << "A";
         //for (int i : out){
         //   std::cout << i << " ";
         //}
@@ -499,16 +501,21 @@ bbbaaaaaaaaaaa
 ?a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaaa
 
+
 ??
 asdasdsad
-
 
 ??asd?s??
 asdasdasad
 
 
-?bb???????????
+?bb?????a?????
 bbbaaaaaaaaaaa
+
+
+// TODO: Check
+???
+aaa
 
 // TODO: Изменить read ???
 
