@@ -327,37 +327,6 @@ bool Trie::Add(const std::string &key, int id) {
     return true;
 }
 
-
-void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
-    // 1. пушим и вставляем символы в строке
-    // 2. Проверяем первый.
-    //    Если все ок, то добавляем индекс в конец
-    // выкидываем первый и вставляем 0 в конец
-    int id;
-
-    while (!symbols_id.empty()) {
-        id = symbols_id.back();
-        //std::cout << "id "<< id << " \n"; //
-        symbols_id.pop_back();
-        state[shifts[id]]++;
-    }
-
-    //for (int i = 0; i < state.size(); i++){
-    //    std::cout << state[i] << " ";
-    //}
-    //std::cout << "\n";s
-
-    if (state.back() == words_count) {
-        answer.push_back(counter - state_size);
-        //td::cout << answer.back() << "\n";
-    }
-
-    //std::cout << counter - state.back() << " ";
-    state.pop_back();
-    state.push_front(0);
-    counter++;
-}
-
 void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str,
                int &left_q, int &right_q) {
     bool new_symbol = false;
@@ -419,9 +388,11 @@ void Pattern::Print(int left_q, int right_q) {
     //std::cout << answer[0] << answer[1];
     //std::cout << answer.size();
     while (!answer.empty()) {
-        ans = answer.front();
-        //std::cout << ans << " ";
-        //std::cout << counter - right_q << "\n";
+        ans = answer.front() + left_q;
+
+        //std::cout << "ans " << ans << "\n";
+        //std::cout << left_q << " ";
+        //std::cout << counter - state_size - right_q << "\n";
 
         if ((ans >= left_q) && (ans <= counter - state_size - right_q)) {
             std::cout << ans << " ";
@@ -430,15 +401,44 @@ void Pattern::Print(int left_q, int right_q) {
         answer.pop_front();
     }
 
-
-    //std::cout << "c " << counter - right_q;
+    //std::cout << "c " << words_count << "\n";
 }
+
+
+void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
+    // 1. пушим и вставляем символы в строке
+    // 2. Проверяем первый.
+    //    Если все ок, то добавляем индекс в конец
+    // выкидываем первый и вставляем 0 в конец
+    int id;
+
+    while (!symbols_id.empty()) {
+        id = symbols_id.back();
+        //std::cout << "id "<< id << " \n"; //
+        symbols_id.pop_back();
+        state[shifts[id]]++;
+    }
+
+    //for (int i = 0; i < state.size(); i++){
+    //    std::cout << state[i] << " ";
+    //}
+    //std::cout << "\n";
+
+    if (state.back() == words_count) {
+        answer.push_back(counter - state_size);
+        //td::cout << answer.back() << "\n";
+    }
+
+    //std::cout << counter - state.back() << " ";
+    state.pop_back();
+    state.push_front(0);
+    counter++;
+}
+
+
 
 int main() {
     Trie trie;
-    // abdk?abchijn?chnit?ijabdf?ijaij
-    // c?bc?abc?
-
     std::string str;
     getline(std::cin, str);
     int state_size_ = str.length(); // TODO: На один больше ???
@@ -499,9 +499,12 @@ abca
 a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaa
 
+??b
+bbbaaaaaaaaaaaa
+
 // TODO: Check !!!
-??
-bbaaaaaaaaaaaaa
+?a?aa?aaa??a?aa?
+aaaaaaaaaaaaaaaa
 
 // TODO: Изменить read ???
 
