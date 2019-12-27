@@ -8,7 +8,7 @@
 struct Node {
     std::map<char, std::shared_ptr<Node>> go;
     std::shared_ptr<Node> pw; // TODO change weak_ptr
-    bool is_terminal = false;
+    bool is_terminal = false; // TODO: Убрать это нафиг !!!
     std::vector<int> word_num; // id терминальных врешин
     std::unordered_map<char, std::shared_ptr<Node>> cash_pw;
     int node_num; // TODO temp
@@ -76,30 +76,6 @@ bool Trie::Has(const std::string &key) const {
     return current->is_terminal;
 }
 
-bool Trie::Add(const std::string &key, int id) {
-    std::shared_ptr<Node> current = root;
-    for (char symbol : key) {
-        auto next = current->go.find(symbol);
-        if (next == current->go.end()) {
-            current = current->go[symbol] = std::make_shared<Node>();
-            //current->pw = current->pw.lock(); // Также добавляем ссылку на root
-            current->pw = root;
-            counter_node_num++; // TODO temp
-            current->node_num = counter_node_num; // TODO temp
-            //std::cout << symbol << " " << counter << "\n";
-        } else {
-            current = next->second;
-        }
-    }
-    // Если терминальная, значит, строка уже есть.
-    if (current->is_terminal) return false;
-    current->is_terminal = true;
-    current->word_num.push_back(id); // номер слова
-    //std::cout << key << " ";
-    //std::cout << current->go.size() << "\n";
-    return true;
-}
-
 bool Trie::Remove(const std::string &key) {
     return remove(root, key, 0).first;
 }
@@ -163,62 +139,6 @@ void Trie::DefLink() {
         }
     }
      */
-}
-
-void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque) {
-    while (!root_deque.empty()) {
-        auto element = root_deque.back();
-        root_deque.pop_back();
-
-        std::shared_ptr<Node> root_ = std::get<0>(element);
-        char symbol = std::get<1>(element);
-        std::shared_ptr<Node> current_ = std::get<2>(element);
-
-        //assert(root_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
-        //assert(current_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
-
-        std::shared_ptr<Node> ref = root_->pw; // TODO .lock();
-
-        //std::cout << root_->pw->node_num << " ";
-        //std::cout << root_->node_num << " ";
-        //std::cout << symbol << " ";
-        //std::cout << current_->pw->node_num << " ";
-        //std::cout << current_->node_num << "\n";
-
-        do {
-            if (ref->go.count(symbol)) { // Если существует путь по нужному ребру
-                current_->pw = ref->go[symbol];
-                ref = root;
-            } else {
-                ref = ref->pw; // TODO .lock();
-                if (ref->go.count(symbol)) { // Если существует путь по нужному ребру
-                    current_->pw = ref->go[symbol];
-                    ref = root;
-                }
-            }
-
-            for (int id : current_->pw->word_num) { // родительские терминальные варшины (имеют один общий суффикс)
-                current_->word_num.push_back(id);
-            }
-
-        } while (ref != root); // Пока не дойдем до корня
-
-        //std::cout << root_->node_num << " ";
-        //std::cout << root_->pw->node_num << " ";
-        //std::cout << current_->node_num << " ";
-        //std::cout << symbol << " ";
-        //for (int num : current_->word_num){
-        //    std::cout << num;
-        //}
-        //std::cout << "\n  \n";
-        //std::cout << current_->pw->node_num << "\n  \n";
-
-
-        for (const auto &iter : current_->go) // добавить в очередь детей !!!
-        {
-            root_deque.push_front(std::make_tuple(current_, iter.first, iter.second)); // обход дочерних вершин
-        }
-    }
 }
 
 std::vector<int> Trie::Step(char symbol) {
@@ -303,49 +223,6 @@ bool Trie::step_link(std::vector<int> &symbols_id, char symbol) {
     }
 }
 
-void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str,
-               int &left_q, int &right_q) {
-    bool new_symbol = false;
-    std::string current_string;
-    int counter = -1;
-
-    for (char symbol : str) {
-        if (symbol == '?') {
-            left_q++;
-        } else {
-            break;
-        }
-    }
-
-    int counter_q = 0;
-    for (char symbol : str) {
-        if (symbol == '?') {
-            counter_q++;
-            new_symbol = true;
-        } else if ((new_symbol) && (!current_string.empty())) {
-            word_dict.push_back(current_string);
-            shifts_.push_back(counter - counter_q);
-            current_string = "";
-        }
-        if (symbol != '?') {
-            current_string += symbol;
-            new_symbol = false;
-            counter_q = 0;
-        }
-        counter++;
-    }
-
-    right_q = counter_q;
-
-    if (!current_string.empty()) {
-        word_dict.push_back(current_string);
-        shifts_.push_back(counter - counter_q);
-    }
-    //for (auto & i : word_dict){ // ??adasda??sadasd??
-    //    std::cout << i << "\n";
-    //}
-}
-
 class Pattern { // TODO: Првило 5 !!!
 public:
     Pattern(std::deque<int> &shifts_, int state_size_) :
@@ -369,6 +246,75 @@ private:
     std::deque<int> answer; // то, что возвращать в ответ
 };
 
+void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str,
+               int &left_q, int &right_q) {
+    bool new_symbol = false;
+    std::string current_string;
+    int counter = -1;
+
+    //for (char symbol : str) {
+    //    std::cout << symbol;
+    //}
+
+    for (char symbol : str) {
+        if (symbol == '?') {
+            left_q++;
+        } else {
+            break;
+        }
+    }
+
+    int counter_q = 0;
+    for (char symbol : str) {
+        //std::cout << counter_q << "\n";
+        if (symbol == '?') {
+            counter_q++;
+            new_symbol = true;
+        } else if ((new_symbol) && (!current_string.empty())) {
+            word_dict.push_back(current_string);
+            shifts_.push_back(counter - counter_q);
+            current_string = "";
+        }
+        if (symbol != '?') {
+            current_string += symbol;
+            new_symbol = false;
+            counter_q = 0;
+        }
+        counter++;
+        //std::cout << counter_q << "\n";
+    }
+
+    right_q = counter_q;
+    //std::cout << right_q << "\n";
+
+    if (!current_string.empty()) {
+        word_dict.push_back(current_string);
+        shifts_.push_back(counter - counter_q);
+    }
+    //for (auto & i : word_dict){ // ??adasda??sadasd??
+    //    std::cout << i << "\n";
+    //}
+}
+
+void Pattern::Print(int left_q, int right_q) { // TODO: check !!!!
+    int ans;
+    counter -= 3;
+    //std::cout << "counter" << counter << "\n";
+    //std::cout << answer.size();
+    //std::cout << answer[0] << answer[1];
+    //std::cout << answer.size();
+    while (!answer.empty()) {
+        ans = answer.front();
+        //std::cout << ans << " ";
+        //std::cout << counter - right_q << "\n";
+
+        if ((ans >= left_q) && (ans <= counter - right_q)) {
+            std::cout << ans << " ";
+        }
+        answer.pop_front();
+    }
+}
+
 void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
     // 1. пушим и вставляем символы в строке
     // 2. Проверяем первый.
@@ -378,7 +324,7 @@ void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпада�
 
     while (!symbols_id.empty()) {
         id = symbols_id.back();
-        //std::cout << id << " ";
+        //std::cout << "id "<< id << " \n"; // TODO: FIX Почему нет id 3 и 4 ??????
         symbols_id.pop_back();
         state[shifts[id]]++;
     }
@@ -392,26 +338,103 @@ void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпада�
         answer.push_back(counter - state_size);
         //td::cout << answer.back() << "\n";
     }
+
     //std::cout << counter - state.back() << " ";
     state.pop_back();
     state.push_front(0);
     counter++;
 }
 
-void Pattern::Print(int left_q, int right_q) { // TODO: check !!!!
-    int ans;
-    //std::cout << answer.size();
-    //std::cout << answer[0] << answer[1];
-    //std::cout << answer.size();
-    while (!answer.empty()) {
-        ans = answer.front();
-        //std::cout << ans << " ";
-        if ((ans >= left_q) && (ans <= counter - right_q)) {
-            std::cout << ans << " ";
+
+void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque) {
+    while (!root_deque.empty()) {
+        auto element = root_deque.back();
+        root_deque.pop_back();
+
+        std::shared_ptr<Node> root_ = std::get<0>(element);
+        char symbol = std::get<1>(element);
+        std::shared_ptr<Node> current_ = std::get<2>(element);
+
+        //assert(root_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
+        //assert(current_ != nullptr); // Проверить, что вершина, на которую ссылкается не нулевая
+
+        std::shared_ptr<Node> ref = root_->pw; // TODO .lock();
+
+        //std::cout << "\n" << root_->node_num << " ";
+        //std::cout << root_->pw->node_num << " ";
+        //std::cout << symbol << " ";
+        //std::cout << current_->node_num << " ";
+        //std::cout << current_->pw->node_num << "\n";
+
+        do {
+            if (ref->go.count(symbol)) { // Если существует путь по нужному ребру
+                current_->pw = ref->go[symbol];
+                ref = root;
+            } else {
+                ref = ref->pw; // TODO .lock();
+                if (ref->go.count(symbol)) { // Если существует путь по нужному ребру
+                    current_->pw = ref->go[symbol];
+                    ref = root;
+                }
+            }
+
+            for (int id : current_->pw->word_num) { // родительские терминальные варшины (имеют один общий суффикс)
+                current_->word_num.push_back(id);
+            }
+
+        } while (ref != root); // Пока не дойдем до корня
+
+        //std::cout << root_->node_num << " ";
+        //std::cout << root_->pw->node_num << " ";
+        //std::cout << symbol << " ";
+        //std::cout << current_->node_num << " ";
+        //std::cout << current_->pw->node_num << "\n  \n";
+        //for (int num : current_->word_num){
+        //    std::cout << num;
+        //}
+        //std::cout << "\n  \n";
+
+
+        for (const auto &iter : current_->go) // добавить в очередь детей !!!
+        {
+            root_deque.push_front(std::make_tuple(current_, iter.first, iter.second)); // обход дочерних вершин
         }
-        answer.pop_front();
     }
 }
+
+bool Trie::Add(const std::string &key, int id) {
+    std::shared_ptr<Node> current = root;
+    for (char symbol : key) {
+        auto next = current->go.find(symbol);
+        if (next == current->go.end()) {
+            current = current->go[symbol] = std::make_shared<Node>();
+            //current->pw = current->pw.lock(); // Также добавляем ссылку на root
+            current->pw = root;
+            counter_node_num++; // TODO temp
+            current->node_num = counter_node_num; // TODO temp
+            //std::cout << symbol << " " << counter << "\n";
+        } else {
+            current = next->second;
+        }
+    }
+    // Если терминальная, значит, строка уже есть.
+    //if (current->is_terminal) return false;
+    //current->is_terminal = true;
+    current->word_num.push_back(id); // номер слова
+    //std::cout << id << " ";
+
+
+
+    //std::cout << key << " ";
+    //std::cout << current->go.size() << "\n";
+    return true;
+}
+// TODO: Добавление одинаковых строк !!!!! Добавить интекс. Почему то он не добавляется в этом случае ???
+
+
+
+
+
 
 
 int main() {
@@ -429,12 +452,12 @@ int main() {
     int right_q = 0;
     list_fill(words_list, shifts_, str, left_q, right_q);
 
-    //std::cout << left_q << " ";
-    //std::cout << right_q << " ";
+    //std::cout << "left_q" <<left_q << " ";
+    //std::cout << "right_q" << right_q << " ";
 
     for (int i = 0; i < shifts_.size(); i++) {
         trie.Add(words_list.front(), i);
-        //std::cout << shifts_[i] << " " << "\n";
+        //std::cout << i << " " << shifts_[i] << " " << "\n";
         words_list.pop_front();
     }
     trie.DefLink();
@@ -469,6 +492,23 @@ ababacaba
 
 aa??bab?cbaa?
 aabbbabbcbaabaabbbabbcbaab
+
+ba?aab?abab
+aababab
+
+a??
+abcaaaaab
+
+// TODO: Check !!!
+a?aa?aaa??a?aa?
+aaaaaaaaaaaaaaa
+
+// TODO: Бага с одинми вопросами !!!!
+// TODO: Check !!!
+??
+bbaaaaaaaaaaaaa
+
+// TODO: Изменить read ???
  */
 
 
