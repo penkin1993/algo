@@ -235,7 +235,7 @@ public:
 
     void Step(std::vector<int> &symbols_id, const int left_q);
 
-    void Print(int left_q, int right_q);
+    void Print(int left_q);
 
 private:
     int counter = 1;
@@ -327,8 +327,7 @@ bool Trie::Add(const std::string &key, int id) {
     return true;
 }
 
-void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str,
-               int &left_q, int &right_q) {
+void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str, int &left_q) {
     bool new_symbol = false;
     std::string current_string;
     int counter = -1;
@@ -365,7 +364,6 @@ void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std
         //std::cout << counter_q << "\n";
     }
 
-    right_q = counter_q;
     //std::cout << right_q << "\n";
 
     if (!current_string.empty()) {
@@ -407,7 +405,7 @@ void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {// TODO: Che
     counter++;
 }
 
-void Pattern::Print(int left_q, int right_q) {
+void Pattern::Print(int left_q) {
     int ans;
     counter -= 2;
     if (words_count == 0){
@@ -425,25 +423,13 @@ void Pattern::Print(int left_q, int right_q) {
         //std::cout << "right_q " << right_q << " ";
         //std::cout << "end " << counter - state_size - right_q << "\n";
         //std::cout << counter - state_size - right_q << "\n";
-
-
-
-
         if ((ans >= 0) && (ans + state_size <= counter)) { // right_q
             std::cout << ans << " ";
         }
-
-
-
-
-
-
         answer.pop_front();
     }
-
     //std::cout << "c " << words_count << "\n";
 }
-
 
 
 int main() {
@@ -455,8 +441,7 @@ int main() {
     std::deque<std::string> words_list;
     std::deque<int> shifts_;
     int left_q = 0;
-    int right_q = 0;
-    list_fill(words_list, shifts_, str, left_q, right_q);
+    list_fill(words_list, shifts_, str, left_q);
 
     // std::cout << "left_q" <<left_q << " ";
     // std::cout << "right_q" << right_q << " ";
@@ -486,7 +471,7 @@ int main() {
         pattern.Step(out, left_q);
     }
 
-    pattern.Print(left_q, right_q);
+    pattern.Print(left_q);
 
     return 0;
 }
@@ -502,7 +487,7 @@ aabbbabbcbaabaabbbabbcbaab
 ba?aab?abab
 aababab
 
-a?
+??a
 abca
 
 a?aa?aaa??a?aa?
@@ -517,11 +502,11 @@ aaaaaaaaaaaaaaaa
 ??
 asdasdsad
 
-// TODO: Check !!
+
 ??asd?s??
 asdasdasad
 
-TODO: Check !!!
+
 ?bb???????????
 bbbaaaaaaaaaaa
 
