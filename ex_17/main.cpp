@@ -296,56 +296,6 @@ void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std
     //}
 }
 
-void Pattern::Print(int left_q, int right_q) { // TODO: check !!!!
-    int ans;
-    counter -= 3;
-    //std::cout << "counter" << counter << "\n";
-    //std::cout << answer.size();
-    //std::cout << answer[0] << answer[1];
-    //std::cout << answer.size();
-    while (!answer.empty()) {
-        ans = answer.front();
-        //std::cout << ans << " ";
-        //std::cout << counter - right_q << "\n";
-
-        if ((ans >= left_q) && (ans <= counter - right_q)) {
-            std::cout << ans << " ";
-        }
-        answer.pop_front();
-    }
-}
-
-void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
-    // 1. пушим и вставляем символы в строке
-    // 2. Проверяем первый.
-    //    Если все ок, то добавляем индекс в конец
-    // выкидываем первый и вставляем 0 в конец
-    int id;
-
-    while (!symbols_id.empty()) {
-        id = symbols_id.back();
-        //std::cout << "id "<< id << " \n"; // TODO: FIX Почему нет id 3 и 4 ??????
-        symbols_id.pop_back();
-        state[shifts[id]]++;
-    }
-
-    //for (int i = 0; i < state.size(); i++){
-    //    std::cout << state[i] << " ";
-    //}
-    //std::cout << "\n";
-
-    if (state.back() == words_count) {
-        answer.push_back(counter - state_size);
-        //td::cout << answer.back() << "\n";
-    }
-
-    //std::cout << counter - state.back() << " ";
-    state.pop_back();
-    state.push_front(0);
-    counter++;
-}
-
-
 void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque) {
     while (!root_deque.empty()) {
         auto element = root_deque.back();
@@ -429,12 +379,62 @@ bool Trie::Add(const std::string &key, int id) {
     //std::cout << current->go.size() << "\n";
     return true;
 }
-// TODO: Добавление одинаковых строк !!!!! Добавить интекс. Почему то он не добавляется в этом случае ???
+
+
+void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
+    // 1. пушим и вставляем символы в строке
+    // 2. Проверяем первый.
+    //    Если все ок, то добавляем индекс в конец
+    // выкидываем первый и вставляем 0 в конец
+    int id;
+
+    while (!symbols_id.empty()) {
+        id = symbols_id.back();
+        //std::cout << "id "<< id << " \n"; //
+        symbols_id.pop_back();
+        state[shifts[id]]++;
+    }
+
+    //for (int i = 0; i < state.size(); i++){
+    //    std::cout << state[i] << " ";
+    //}
+    //std::cout << "\n";
 
 
 
+    if (state.back() == words_count) {
+        answer.push_back(counter - state_size);
+        //td::cout << answer.back() << "\n";
+    }
+
+    //std::cout << counter - state.back() << " ";
+    state.pop_back();
+    state.push_front(0);
+    counter++;
+}
+
+void Pattern::Print(int left_q, int right_q) {
+    int ans;
+    counter -= 1;
+    //std::cout << "counter" << counter << "\n";
+    //std::cout << answer.size();
+    //std::cout << answer[0] << answer[1];
+    //std::cout << answer.size();
+    while (!answer.empty()) {
+        ans = answer.front();
+        //std::cout << ans << " ";
+        //std::cout << counter - right_q << "\n";
+
+        if ((ans >= left_q) && (ans <= counter - state_size - right_q)) {
+            std::cout << ans << " ";
+            //std::cout << "words_count " <<  << " words_count";
+        }
+        answer.pop_front();
+    }
 
 
+    //std::cout << "c " << counter - right_q;
+}
 
 
 int main() {
@@ -452,12 +452,12 @@ int main() {
     int right_q = 0;
     list_fill(words_list, shifts_, str, left_q, right_q);
 
-    //std::cout << "left_q" <<left_q << " ";
-    //std::cout << "right_q" << right_q << " ";
+    // std::cout << "left_q" <<left_q << " ";
+    // std::cout << "right_q" << right_q << " ";
 
     for (int i = 0; i < shifts_.size(); i++) {
         trie.Add(words_list.front(), i);
-        //std::cout << i << " " << shifts_[i] << " " << "\n";
+        // std::cout << i << " " << shifts_[i] << " " << "\n";
         words_list.pop_front();
     }
     trie.DefLink();
@@ -496,19 +496,21 @@ aabbbabbcbaabaabbbabbcbaab
 ba?aab?abab
 aababab
 
-a??
-abcaaaaab
+a?
+abca
 
-// TODO: Check !!!
 a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaa
 
-// TODO: Бага с одинми вопросами !!!!
 // TODO: Check !!!
 ??
 bbaaaaaaaaaaaaa
 
 // TODO: Изменить read ???
+
+
+
+
  */
 
 
