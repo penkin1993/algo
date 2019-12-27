@@ -246,56 +246,6 @@ private:
     std::deque<int> answer; // то, что возвращать в ответ
 };
 
-void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str,
-               int &left_q, int &right_q) {
-    bool new_symbol = false;
-    std::string current_string;
-    int counter = -1;
-
-    //for (char symbol : str) {
-    //    std::cout << symbol;
-    //}
-
-    for (char symbol : str) {
-        if (symbol == '?') {
-            left_q++;
-        } else {
-            break;
-        }
-    }
-
-    int counter_q = 0;
-    for (char symbol : str) {
-        //std::cout << counter_q << "\n";
-        if (symbol == '?') {
-            counter_q++;
-            new_symbol = true;
-        } else if ((new_symbol) && (!current_string.empty())) {
-            word_dict.push_back(current_string);
-            shifts_.push_back(counter - counter_q);
-            current_string = "";
-        }
-        if (symbol != '?') {
-            current_string += symbol;
-            new_symbol = false;
-            counter_q = 0;
-        }
-        counter++;
-        //std::cout << counter_q << "\n";
-    }
-
-    right_q = counter_q;
-    //std::cout << right_q << "\n";
-
-    if (!current_string.empty()) {
-        word_dict.push_back(current_string);
-        shifts_.push_back(counter - counter_q);
-    }
-    //for (auto & i : word_dict){ // ??adasda??sadasd??
-    //    std::cout << i << "\n";
-    //}
-}
-
 void Trie::defLink(std::deque<std::tuple<std::shared_ptr<Node>, char, std::shared_ptr<Node>>> &root_deque) {
     while (!root_deque.empty()) {
         auto element = root_deque.back();
@@ -372,9 +322,6 @@ bool Trie::Add(const std::string &key, int id) {
     //current->is_terminal = true;
     current->word_num.push_back(id); // номер слова
     //std::cout << id << " ";
-
-
-
     //std::cout << key << " ";
     //std::cout << current->go.size() << "\n";
     return true;
@@ -398,9 +345,7 @@ void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпада�
     //for (int i = 0; i < state.size(); i++){
     //    std::cout << state[i] << " ";
     //}
-    //std::cout << "\n";
-
-
+    //std::cout << "\n";s
 
     if (state.back() == words_count) {
         answer.push_back(counter - state_size);
@@ -413,9 +358,62 @@ void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпада�
     counter++;
 }
 
+void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str,
+               int &left_q, int &right_q) {
+    bool new_symbol = false;
+    std::string current_string;
+    int counter = -1;
+
+    //for (char symbol : str) {
+    //    std::cout << symbol;
+    //}
+
+    for (char symbol : str) {
+        if (symbol == '?') {
+            left_q++;
+        } else {
+            break;
+        }
+    }
+
+    int counter_q = 0;
+    for (char symbol : str) {
+        //std::cout << counter_q << "\n";
+        if (symbol == '?') {
+            counter_q++;
+            new_symbol = true;
+        } else if ((new_symbol) && (!current_string.empty())) {
+            word_dict.push_back(current_string);
+            shifts_.push_back(counter - counter_q);
+            current_string = "";
+        }
+        if (symbol != '?') {
+            current_string += symbol;
+            new_symbol = false;
+            counter_q = 0;
+        }
+        counter++;
+        //std::cout << counter_q << "\n";
+    }
+
+    right_q = counter_q;
+    //std::cout << right_q << "\n";
+
+    if (!current_string.empty()) {
+        word_dict.push_back(current_string);
+        shifts_.push_back(counter - counter_q);
+    }
+    //for (auto & i : word_dict){ // ??adasda??sadasd??
+    //    std::cout << i << "\n";
+    //}
+}
+
 void Pattern::Print(int left_q, int right_q) {
     int ans;
     counter -= 1;
+    if (words_count == 0){
+        left_q = 0;
+    }
     //std::cout << "counter" << counter << "\n";
     //std::cout << answer.size();
     //std::cout << answer[0] << answer[1];
@@ -435,7 +433,6 @@ void Pattern::Print(int left_q, int right_q) {
 
     //std::cout << "c " << counter - right_q;
 }
-
 
 int main() {
     Trie trie;
@@ -507,9 +504,6 @@ aaaaaaaaaaaaaaa
 bbaaaaaaaaaaaaa
 
 // TODO: Изменить read ???
-
-
-
 
  */
 
