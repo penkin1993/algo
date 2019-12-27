@@ -233,7 +233,7 @@ public:
         }
     };
 
-    void Step(std::vector<int> &symbols_id, const int left_q);
+    void Step(std::vector<int> &symbols_id, int left_q);
 
     void Print(int left_q);
 
@@ -375,7 +375,7 @@ void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std
     //}
 }
 
-void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {// TODO: Check Совпадают ли размеры ???
+void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {
     // 1. пушим и вставляем символы в строке
     // 2. Проверяем первый.
     //    Если все ок, то добавляем индекс в конец
@@ -408,9 +408,7 @@ void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {// TODO: Che
 void Pattern::Print(int left_q) {
     int ans;
     counter -= 1;
-    if (words_count == 0){
-        left_q = 0;
-    }
+
     //std::cout << "counter" << counter << "\n";
     //std::cout << answer.size();
     //std::cout << answer[0] << answer[1];
@@ -480,6 +478,10 @@ int main() {
 
 // TODO: Вернуть weak_ptr !!!!
 /*
+
+???
+aaa
+
 ab??aba
 ababacaba
 
@@ -501,7 +503,6 @@ bbbaaaaaaaaaaa
 ?a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaaa
 
-
 ??
 asdasdsad
 
@@ -511,14 +512,6 @@ asdasdasad
 
 ?bb?????a?????
 bbbaaaaaaaaaaa
-
-
-// TODO: Check
-???
-aaa
-
-// TODO: Изменить read ???
-
  */
 
 
