@@ -407,7 +407,7 @@ void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {// TODO: Che
 
 void Pattern::Print(int left_q) {
     int ans;
-    counter -= 2;
+    counter -= 1;
     if (words_count == 0){
         left_q = 0;
     }
@@ -465,7 +465,7 @@ int main() {
         if (symbol == '\n' || symbol == EOF)
             break;
         out = trie.Step(symbol);
-        std::cout << "A";
+        //std::cout << "A";
         //for (int i : out){
         //   std::cout << i << " ";
         //}
