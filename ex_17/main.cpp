@@ -233,7 +233,7 @@ public:
         }
     };
 
-    void Step(std::vector<int> &symbols_id);
+    void Step(std::vector<int> &symbols_id, const int left_q);
 
     void Print(int left_q, int right_q);
 
@@ -377,35 +377,7 @@ void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std
     //}
 }
 
-void Pattern::Print(int left_q, int right_q) {
-    int ans;
-    counter -= 1;
-    if (words_count == 0){
-        left_q = 0;
-    }
-    //std::cout << "counter" << counter << "\n";
-    //std::cout << answer.size();
-    //std::cout << answer[0] << answer[1];
-    //std::cout << answer.size();
-    while (!answer.empty()) {
-        ans = answer.front() + left_q;
-
-        //std::cout << "ans " << ans << "\n";
-        //std::cout << left_q << " ";
-        //std::cout << counter - state_size - right_q << "\n";
-
-        if ((ans >= left_q) && (ans <= counter - state_size - right_q)) {
-            std::cout << ans << " ";
-            //std::cout << "words_count " <<  << " words_count";
-        }
-        answer.pop_front();
-    }
-
-    //std::cout << "c " << words_count << "\n";
-}
-
-
-void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпадают ли размеры ???
+void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {// TODO: Check Совпадают ли размеры ???
     // 1. пушим и вставляем символы в строке
     // 2. Проверяем первый.
     //    Если все ок, то добавляем индекс в конец
@@ -425,7 +397,7 @@ void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпада�
     //std::cout << "\n";
 
     if (state.back() == words_count) {
-        answer.push_back(counter - state_size);
+        answer.push_back(counter - state_size - left_q);
         //td::cout << answer.back() << "\n";
     }
 
@@ -433,6 +405,34 @@ void Pattern::Step(std::vector<int> &symbols_id) {// TODO: Check Совпада�
     state.pop_back();
     state.push_front(0);
     counter++;
+}
+
+void Pattern::Print(int left_q, int right_q) {
+    int ans;
+    counter -= 1;
+    if (words_count == 0){
+        left_q = 0;
+    }
+    //std::cout << "counter" << counter << "\n";
+    //std::cout << answer.size();
+    //std::cout << answer[0] << answer[1];
+    //std::cout << answer.size();
+    while (!answer.empty()) {
+        ans = answer.front() + left_q;
+
+        //std::cout << "ans " << ans << "\n";
+        //std::cout << left_q << " ";
+        //std::cout << right_q << " ";
+        //std::cout << counter - state_size - right_q << "\n";
+
+        if ((ans >= 0) && (ans <= counter - state_size - right_q)) {
+            std::cout << ans << " ";
+            //std::cout << "words_count " <<  << " words_count";
+        }
+        answer.pop_front();
+    }
+
+    //std::cout << "c " << words_count << "\n";
 }
 
 
@@ -474,7 +474,7 @@ int main() {
         //   std::cout << i << " ";
         //}
         //std::cout << "\n";
-        pattern.Step(out);
+        pattern.Step(out, left_q);
     }
 
     pattern.Print(left_q, right_q);
@@ -500,11 +500,13 @@ a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaa
 
 ??b
-bbbaaaaaaaaaaaa
+bbbaaaaaaaaaaa
 
-// TODO: Check !!!
 ?a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaaa
+
+??
+asdasdsad
 
 // TODO: Изменить read ???
 
