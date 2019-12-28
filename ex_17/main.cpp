@@ -104,10 +104,10 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
                 ref = 0;
             } else {
                 ref = parent_id[ref]; // переходим по ссылке родителя
-                //if (node_array[ref]->go.count(symbol)) { // Если существует путь по нужному ребру // TODO: Нужно ли это ???
-                //    parent_id[current_] = node_array[ref]->go[symbol];
-                //    ref = 0;
-                //}
+                if (node_array[ref]->go.count(symbol)) { // Если существует путь по нужному ребру 
+                    parent_id[current_] = node_array[ref]->go[symbol];
+                    ref = 0;
+                }
             }
             for (int id : node_array[parent_id[current_]]->word_num) { // родительские терминальные варшины (имеют один общий суффикс) // TODO: Отрабатывает один раз ???
                 node_array[current_]->word_num.push_back(id);
@@ -122,12 +122,6 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
         }
     }
 }
-
-
-
-
-
-
 
 
 
