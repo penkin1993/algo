@@ -28,11 +28,7 @@ public:
 
     ~Trie() = default;
 
-    bool Has(const std::string &key) const;
-
     bool Add(const std::string &key, int id);
-
-    bool Remove(const std::string &key);
 
     void Print() const;
 
@@ -64,20 +60,6 @@ Trie::Trie() {
     //root->pw = root->pw.lock();
     root->pw = root;
     current_state = root;
-}
-
-bool Trie::Has(const std::string &key) const {
-    std::shared_ptr<Node> current = root;
-    for (char symbol : key) {
-        auto next = current->go.find(symbol);
-        if (next == current->go.end()) return false;
-        current = next->second;
-    }
-    return current->is_terminal;
-}
-
-bool Trie::Remove(const std::string &key) {
-    return remove(root, key, 0).first;
 }
 
 std::pair<bool, bool> Trie::remove(
@@ -393,6 +375,7 @@ void Pattern::Step(std::vector<int> &symbols_id, const int left_q) {
     //    std::cout << state[i] << " ";
     //}
     //std::cout << "\n";
+    //std::cout << "id "<< id << "\n";
 
     if (state.back() == words_count) {
         answer.push_back(counter - state_size - left_q);
@@ -430,10 +413,13 @@ void Pattern::Print(int left_q) {
 }
 
 int main() {
+    std::iostream::sync_with_stdio( false );
     Trie trie;
     std::string str;
-    getline(std::cin, str);
+    //getline(std::cin, str);
+    std::cin >> str;
     int state_size_ = str.length();
+    //std::cout << str;
     //std::cout << state_size_;
 
     std::deque<std::string> words_list;
@@ -453,21 +439,16 @@ int main() {
     //trie.Print();
 
     std::vector<int> out;
-    char symbol = ' ';
+    //char symbol = ' ';
 
     Pattern pattern = Pattern(shifts_, state_size_);
 
-    for (;;) //Считывание в массив подстроки
-    {
-        std::cin.get(symbol);
-        if (symbol == '\n' || symbol == EOF)
-            break;
-        out = trie.Step(symbol);
-        //std::cout << "A";
-        //for (int i : out){
-        //   std::cout << i << " ";
-        //}
-        //std::cout << "\n";
+    std::string text;
+    std::cin >> text;
+
+    for (std::string::iterator it = text.begin(); it != text.end(); ++it) {
+
+        out = trie.Step(*it);
         pattern.Step(out, left_q);
     }
 
@@ -477,42 +458,77 @@ int main() {
 }
 
 // TODO: Вернуть weak_ptr !!!!
+
 /*
+
+?a?a?a?a?a?a?a?a?a?a????????
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+
+??ab??ab??
+ababacabaabababababababa
 
 ???
 aaa
 
+
 ab??aba
 ababacaba
+
 
 aa??bab?cbaa?
 aabbbabbcbaabaabbbabbcbaab
 
+
 ba?aab?abab
 aababab
+
 
 ??a
 abca
 
+
 a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaa
+
 
 ??b
 bbbaaaaaaaaaaa
 
+
 ?a?aa?aaa??a?aa?
 aaaaaaaaaaaaaaaa
 
+
 ??
 asdasdsad
+
 
 ??asd?s??
 asdasdasad
 
 
+??
+a
+
+
 ?bb?????a?????
 bbbaaaaaaaaaaa
- */
+
+
+??
+bbaaaa
+
+
+???????a
+aaaaaaaa
+
+0
+
+b?a
+abba
+
+*/
 
 
 
