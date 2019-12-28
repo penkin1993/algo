@@ -5,15 +5,6 @@
 #include <unordered_map>
 
 
-struct Node {
-    Node(int id_) : id(id_){}
-    int id;
-    std::unordered_map<char, int> go; // переход в id вершины
-    bool is_terminal = false;
-    std::vector<int> word_num; // id терминальных врешин
-    std::unordered_map<char, int> cash_pw;
-};
-
 class Trie {
 public:
     Trie();
@@ -36,51 +27,59 @@ public:
 
 private:
     int counter_id = 0;
-    std::vector<std::shared_ptr<Node>> node_array; // массив со всеми нодами
-    std::vector<int> parent_id; // индекс суффиксной вершины
     int current_state = 0; // состояние автомата
+    std::vector<int> node_array; // массив со всеми нодами
+    std::vector<std::vector<int>> word_num;
+    std::vector<int> parent_id; // индекс суффиксной вершины
+    std::vector<std::unordered_map<char, int>> go;
+    std::vector<std::unordered_map<char, int>> cash_pw;
 
     // Возвращает пару bool: первый - о наличии строки
     // второй - о единственности узла и необходимости его удалить.
 
     void defLink(std::deque<std::tuple<int, char, int>> &root_deque);
-
     bool step_down(std::deque<int> &symbols_id, char symbol); // вспомогательная функция основного алгоритма
     bool step_long_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
     bool step_short_link(std::deque<int> &symbols_id, char symbol, std::vector<int> &path_nodes); // вспомогательная функция прохода по ссылкам
 };
 
 Trie::Trie() {
-    node_array.push_back(std::make_shared<Node>(0));
+    node_array.push_back(0);
     parent_id.push_back(0);
+    word_num.emplace_back();
+    go.emplace_back();
+    cash_pw.emplace_back();
 }
 
 
 bool Trie::Add(const std::string &key, int id_terminal) {
     int current = 0;
     for (char symbol : key) {
-        auto next = node_array[current]->go.find(symbol);
-        if (next == node_array[current]->go.end()) {
+        auto next = go[current].find(symbol);
+        if (next == go[current].end()) {
             counter_id++;
             parent_id.push_back(0); // суффиксная ссылка вначале указывает на родителя
-            node_array.push_back(std::make_shared<Node>(counter_id)); // добавили в массив
-            node_array[current]->go[symbol] = counter_id; // добавить у родителя ссыокку в go
+            node_array.push_back(counter_id); // добавили в массив
+            go.emplace_back(); // добавить новый словарь
+            //go[current]->at(symbol) = counter_id; // добавить у родителя ссыокку в go
+            go[current].insert( std::pair<char, int>(symbol,counter_id));
+            cash_pw.emplace_back();
+            word_num.emplace_back();
             current = counter_id; // перейти к сыну
-            //std::cout << symbol << " " << counter << "\n";
         } else {
             current = next->second;
         }
     }
-    node_array[current]->word_num.push_back(id_terminal); // номер слова
+    word_num[current].push_back(id_terminal); // номер слова
     return true;
 }
 
 void Trie::DefLink() {
     std::deque<std::tuple<int, char, int>> root_deque;
 
-    for (const auto &iter : node_array[0]->go) // добавить в очередь детей и их потомков, поскольку потомки первых детей имею ссылки на корень!!!
+    for (const auto &iter : go[0]) // добавить в очередь детей и их потомков, поскольку потомки первых детей имею ссылки на корень!!!
     {
-        for (const auto &iter_child: node_array[iter.second]->go) {
+        for (const auto &iter_child: go[iter.second]) {
             root_deque.push_front(
                     std::make_tuple(iter.second, iter_child.first, iter_child.second)); // обход дочерних вершин
         }
@@ -99,24 +98,23 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
         int ref = parent_id[root_];
 
         do {
-            if (node_array[ref]->go.count(symbol)) { // Если существует путь по нужному ребру
-                parent_id[current_] = node_array[ref]->go[symbol];
+            if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
+                parent_id[current_] = go[ref].at(symbol);
                 ref = 0;
             } else {
                 ref = parent_id[ref]; // переходим по ссылке родителя
-                if (node_array[ref]->go.count(symbol)) { // Если существует путь по нужному ребру 
-                    parent_id[current_] = node_array[ref]->go[symbol];
+                if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
+                    parent_id[current_] = go[ref].at(symbol);
                     ref = 0;
                 }
             }
-            for (int id : node_array[parent_id[current_]]->word_num) { // родительские терминальные варшины (имеют один общий суффикс) // TODO: Отрабатывает один раз ???
-                node_array[current_]->word_num.push_back(id);
+            for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс) // TODO: Отрабатывает один раз ???
+                word_num[current_].push_back(id);
             }
 
         } while (ref != 0); // Пока не дойдем до корня
 
-
-        for (const auto &iter : node_array[current_]->go) // добавить в очередь детей !!!
+        for (const auto &iter : go[current_]) // добавить в очередь детей !!!
         {
             root_deque.push_front(std::make_tuple(current_, iter.first, iter.second)); // обход дочерних вершин
         }
@@ -147,7 +145,8 @@ std::deque<int> Trie::Step(char symbol) {
     // Запоминаем вершину перехода в cash_pw
     //old_state->cash_pw[symbol] = current_state;
     while (!path_nodes.empty()){
-        node_array[path_nodes.back()]->cash_pw[symbol] = current_state;
+        //cash_pw[path_nodes.back()]->at(symbol) = current_state;
+        cash_pw[path_nodes.back()].insert( std::pair<char, int>(symbol,current_state));
         path_nodes.pop_back();
     }
     return symbols_id;
@@ -155,9 +154,9 @@ std::deque<int> Trie::Step(char symbol) {
 
 
 bool Trie::step_down(std::deque<int> &symbols_id, char symbol) {
-    if (node_array[current_state]->go.count(symbol)) {
-        current_state = node_array[current_state]->go[symbol];
-        for (int id : node_array[current_state]->word_num) { // перешли в новое состояние и запушили id слов
+    if (go[current_state].count(symbol)) {
+        current_state = go[current_state].at(symbol);
+        for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
             symbols_id.push_back(id);
         }
         return true;
@@ -166,9 +165,9 @@ bool Trie::step_down(std::deque<int> &symbols_id, char symbol) {
 }
 
 bool Trie::step_long_link(std::deque<int> &symbols_id, char symbol) {
-    if (node_array[current_state]->cash_pw.count(symbol)) { // если есть длнная ссылка в кэше
-        current_state = node_array[current_state]->cash_pw[symbol];
-        for (int id : node_array[current_state]->word_num) { // перешли в новое состояние и запушили id слов
+    if (cash_pw[current_state].count(symbol)) { // если есть длнная ссылка в кэше
+        current_state = cash_pw[current_state].at(symbol);
+        for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
             symbols_id.push_back(id);
         }
         return true; // прошли по длинной суффиксной ссылке
