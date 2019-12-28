@@ -159,7 +159,7 @@ public:
     };
     Pattern(const Pattern &) = delete;
 
-    Pattern(Pattern &&) = delete;
+    Pattern(Pattern &&) = default;
 
     Pattern &operator=(const Pattern &) = delete;
 
