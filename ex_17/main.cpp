@@ -34,9 +34,6 @@ private:
     std::vector<std::unordered_map<char, int>> go;
     std::vector<std::unordered_map<char, int>> cash_pw;
 
-    // Возвращает пару bool: первый - о наличии строки
-    // второй - о единственности узла и необходимости его удалить.
-
     void defLink(std::deque<std::tuple<int, char, int>> &root_deque);
     bool step_down(std::deque<int> &symbols_id, char symbol); // вспомогательная функция основного алгоритма
     bool step_long_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
@@ -108,7 +105,7 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
                     ref = 0;
                 }
             }
-            for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс) // TODO: Отрабатывает один раз ???
+            for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс)
                 word_num[current_].push_back(id);
             }
 
@@ -120,8 +117,6 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
         }
     }
 }
-
-
 
 std::deque<int> Trie::Step(char symbol) {
     bool is_finished = false;
@@ -178,8 +173,8 @@ bool Trie::step_long_link(std::deque<int> &symbols_id, char symbol) {
 
 bool Trie::step_short_link(std::deque<int> &symbols_id, char symbol, std::vector<int> &path_nodes) {
     current_state = parent_id[current_state]; // прошли по суффиксной ссылке
-
     if (current_state != 0) {
+        path_nodes.push_back(current_state);
         return false;
     } else {
         step_down(symbols_id, symbol);
