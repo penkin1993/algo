@@ -96,22 +96,18 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
         char symbol = std::get<2>(element);
         int ref = parent_id[root_];
 
-        do {
+        while (true) {
             if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
                 parent_id[current_] = go[ref].at(symbol);
-                ref = 0;
-            } else {
-                ref = parent_id[ref]; // переходим по ссылке родителя
-                if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
-                    parent_id[current_] = go[ref].at(symbol);
-                    ref = 0;
-                } // TODO: Не оптимально ????
+                for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс)
+                    word_num[current_].push_back(id);
+                }
+                break;
+            } else if (ref == 0){
+                break;
             }
-            for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс)
-                word_num[current_].push_back(id);
-            }
-
-        } while (ref != 0); // Пока не дойдем до корня
+            ref = parent_id[ref];
+        }
 
         for (const auto &iter : go[current_]) // добавить в очередь детей !!!
         {
@@ -119,15 +115,6 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
         }
     }
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -303,7 +290,7 @@ int main() {
 }
 
 /*
- *
+
 aa??bab?cbaa?
 aabbbabbcbaabaabbbabbcbaab
 
