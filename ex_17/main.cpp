@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include <deque>
-#include <unordered_map>
+#include <map>
 
 
 class Trie {
@@ -32,15 +32,14 @@ private:
     std::vector<int> node_array; // массив со всеми нодами
     std::vector<int> parent_id; // индекс суффиксной вершины
     std::vector<std::vector<int>> word_num;
-    std::vector<std::unordered_map<char, int>> go;
-    std::vector<std::unordered_map<char, int>> cash_pw;
+    std::vector<std::map<char, int>> go;
+    std::vector<std::map<char, int>> cash_pw;
 
     void defLink(std::deque<std::tuple<int, int, char>> &root_deque);
 
     bool step_down(std::deque<int> &symbols_id, char symbol); // вспомогательная функция основного алгоритма
     bool step_long_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
-    bool step_short_link(std::deque<int> &symbols_id, char symbol,
-                         std::vector<int> &path_nodes); // вспомогательная функция прохода по ссылкам
+    bool step_short_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
 };
 
 Trie::Trie() {
@@ -99,7 +98,6 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
         while (true) {
             if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
                 parent_id[current_] = go[ref].at(symbol);
-                cash_pw[root_].insert(std::pair<char, int>(symbol, go[ref].at(symbol))); // TODO Определять длинную ссылку прямо здесь ??
                 for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс)
                     word_num[current_].push_back(id);
                 }
@@ -117,8 +115,6 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
     }
 }
 
-
-
 std::deque<int> Trie::Step(char symbol) {
     bool is_finished = false;
     std::deque<int> symbols_id;
@@ -126,15 +122,15 @@ std::deque<int> Trie::Step(char symbol) {
     path_nodes.push_back(current_state);
 
     while (!is_finished) {
-        is_finished = step_down(symbols_id, symbol);
-        if (is_finished) {
-            break;
-        }
         is_finished = step_long_link(symbols_id, symbol);
         if (is_finished) {
             break;
         }
-        is_finished = step_short_link(symbols_id, symbol, path_nodes);
+        is_finished = step_down(symbols_id, symbol);
+        if (is_finished) {
+            break;
+        }
+        is_finished = step_short_link(symbols_id, symbol);
     }
     // Запоминаем вершину перехода в cash_pw
     int id;
@@ -172,7 +168,7 @@ bool Trie::step_long_link(std::deque<int> &symbols_id, char symbol) {
 }
 
 
-bool Trie::step_short_link(std::deque<int> &symbols_id, char symbol, std::vector<int> &path_nodes) {
+bool Trie::step_short_link(std::deque<int> &symbols_id, char symbol) {
     current_state = parent_id[current_state]; // прошли по суффиксной ссылке
     if (current_state != 0) {
         path_nodes.push_back(current_state);
