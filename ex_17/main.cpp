@@ -28,13 +28,14 @@ public:
 private:
     int counter_id = 0;
     int current_state = 0; // состояние автомата
+    std::vector<int> path_nodes;
     std::vector<int> node_array; // массив со всеми нодами
     std::vector<int> parent_id; // индекс суффиксной вершины
     std::vector<std::vector<int>> word_num;
     std::vector<std::unordered_map<char, int>> go;
     std::vector<std::unordered_map<char, int>> cash_pw;
 
-    void defLink(std::deque<std::tuple<int, char, int>> &root_deque);
+    void defLink(std::deque<std::tuple<int, int, char>> &root_deque);
 
     bool step_down(std::deque<int> &symbols_id, char symbol); // вспомогательная функция основного алгоритма
     bool step_long_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
@@ -73,26 +74,26 @@ bool Trie::Add(const std::string &key, int id_terminal) {
 }
 
 void Trie::DefLink() {
-    std::deque<std::tuple<int, char, int>> root_deque;
+    std::deque<std::tuple<int, int, char>> root_deque;
 
     for (const auto &iter : go[0]) // добавить в очередь детей и их потомков, поскольку потомки первых детей имею ссылки на корень!!!
     {
         for (const auto &iter_child: go[iter.second]) {
             root_deque.push_front(
-                    std::make_tuple(iter.second, iter_child.first, iter_child.second)); // обход дочерних вершин
+                    std::make_tuple(iter.second, iter_child.second, iter_child.first)); // обход дочерних вершин
         }
     }
     defLink(root_deque);
 }
 
-void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
+void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
     while (!root_deque.empty()) {
         auto element = root_deque.back();
         root_deque.pop_back();
 
         int root_ = std::get<0>(element);
-        char symbol = std::get<1>(element);
-        int current_ = std::get<2>(element);
+        int current_ = std::get<1>(element);
+        char symbol = std::get<2>(element);
         int ref = parent_id[root_];
 
         do {
@@ -104,7 +105,7 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
                 if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
                     parent_id[current_] = go[ref].at(symbol);
                     ref = 0;
-                }
+                } // TODO: Не оптимально ????
             }
             for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс)
                 word_num[current_].push_back(id);
@@ -114,15 +115,26 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
 
         for (const auto &iter : go[current_]) // добавить в очередь детей !!!
         {
-            root_deque.push_front(std::make_tuple(current_, iter.first, iter.second)); // обход дочерних вершин
+            root_deque.push_front(std::make_tuple(current_, iter.second, iter.first)); // обход дочерних вершин
         }
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 std::deque<int> Trie::Step(char symbol) {
     bool is_finished = false;
     std::deque<int> symbols_id;
-    std::vector<int> path_nodes;
     // Создаем буфер из вершин которые посетили и сразу во всех обновляем словрь длинных суффиксных ссылкок
     path_nodes.push_back(current_state);
 
@@ -139,7 +151,10 @@ std::deque<int> Trie::Step(char symbol) {
     }
     // Запоминаем вершину перехода в cash_pw
     while (!path_nodes.empty()) {
-        cash_pw[path_nodes.back()].insert(std::pair<char, int>(symbol, current_state));
+        symbol = path_nodes.back();
+        //if (!cash_pw[symbol].count(symbol)){
+        cash_pw[symbol].insert(std::pair<char, int>(symbol, current_state));
+        //}
         path_nodes.pop_back();
     }
     return symbols_id;
@@ -180,17 +195,10 @@ bool Trie::step_short_link(std::deque<int> &symbols_id, char symbol, std::vector
     }
 }
 
-void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str, int &left_q) {
+void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str) {
     bool new_symbol = false;
     std::string current_string;
     int counter = -1;
-    for (char symbol : str) {
-        if (symbol == '?') {
-            left_q++;
-        } else {
-            break;
-        }
-    }
 
     int counter_q = 0;
     for (char symbol : str) {
@@ -232,25 +240,25 @@ public:
 
     Pattern &operator=(Pattern &&) = delete;
 
-    ~Pattern() = default; // TODO: Изменить
+    ~Pattern();
 
-    void Step(std::deque<int> &symbols_id, int left_q);
+    void Step(std::deque<int> &symbols_id);
 
 private:
-    int counter;// = 0;
+    int * state;
+    int counter;
     int words_count; // сколько всего слов
     int text_length;
     const int state_size; // длина входной строки веместе со всеми ???
     const std::deque<int> &shifts; // на сколько нужно сдвигать
-    int * state;
 };
 
-void Pattern::Step(std::deque<int> &symbols_id, const int left_q) {
-    int id;
+Pattern::~Pattern() {
+    delete [] state;
+}
 
-    while (!symbols_id.empty()) {
-        id = symbols_id.back();
-        symbols_id.pop_back();
+void Pattern::Step(std::deque<int> &symbols_id) {
+    for (int id : symbols_id){
         state[counter - shifts[id]]++; // Отсчет будет не сразу
     }
 
@@ -263,7 +271,6 @@ void Pattern::Step(std::deque<int> &symbols_id, const int left_q) {
 }
 
 
-
 int main() {
     std::iostream::sync_with_stdio(false);
     Trie trie;
@@ -273,8 +280,7 @@ int main() {
 
     std::deque<std::string> words_list;
     std::deque<int> shifts_;
-    int left_q = 0;
-    list_fill(words_list, shifts_, str, left_q);
+    list_fill(words_list, shifts_, str);
 
     for (int i = 0; i < shifts_.size(); i++) {
         trie.Add(words_list.front(), i);
@@ -291,7 +297,7 @@ int main() {
 
     for (char & it : text) {
         out = trie.Step(it);
-        pattern.Step(out, left_q);
+        pattern.Step(out);
     }
     return 0;
 }
