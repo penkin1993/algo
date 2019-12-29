@@ -29,15 +29,17 @@ private:
     int counter_id = 0;
     int current_state = 0; // состояние автомата
     std::vector<int> node_array; // массив со всеми нодами
-    std::vector<std::vector<int>> word_num;
     std::vector<int> parent_id; // индекс суффиксной вершины
+    std::vector<std::vector<int>> word_num;
     std::vector<std::unordered_map<char, int>> go;
     std::vector<std::unordered_map<char, int>> cash_pw;
 
     void defLink(std::deque<std::tuple<int, char, int>> &root_deque);
+
     bool step_down(std::deque<int> &symbols_id, char symbol); // вспомогательная функция основного алгоритма
     bool step_long_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
-    bool step_short_link(std::deque<int> &symbols_id, char symbol, std::vector<int> &path_nodes); // вспомогательная функция прохода по ссылкам
+    bool step_short_link(std::deque<int> &symbols_id, char symbol,
+                         std::vector<int> &path_nodes); // вспомогательная функция прохода по ссылкам
 };
 
 Trie::Trie() {
@@ -58,8 +60,7 @@ bool Trie::Add(const std::string &key, int id_terminal) {
             parent_id.push_back(0); // суффиксная ссылка вначале указывает на родителя
             node_array.push_back(counter_id); // добавили в массив
             go.emplace_back(); // добавить новый словарь
-            //go[current]->at(symbol) = counter_id; // добавить у родителя ссыокку в go
-            go[current].insert( std::pair<char, int>(symbol,counter_id));
+            go[current].insert(std::pair<char, int>(symbol, counter_id));// добавить у родителя ссыокку в go
             cash_pw.emplace_back();
             word_num.emplace_back();
             current = counter_id; // перейти к сыну
@@ -121,27 +122,24 @@ void Trie::defLink(std::deque<std::tuple<int, char, int>> &root_deque) {
 std::deque<int> Trie::Step(char symbol) {
     bool is_finished = false;
     std::deque<int> symbols_id;
-    //std::shared_ptr<Node> old_state = current_state; // запоминаем для hash_map
     std::vector<int> path_nodes;
     // Создаем буфер из вершин которые посетили и сразу во всех обновляем словрь длинных суффиксных ссылкок
     path_nodes.push_back(current_state);
 
     while (!is_finished) {
         is_finished = step_down(symbols_id, symbol);
-        if (is_finished){
+        if (is_finished) {
             break;
         }
         is_finished = step_long_link(symbols_id, symbol);
-        if (is_finished){
+        if (is_finished) {
             break;
         }
         is_finished = step_short_link(symbols_id, symbol, path_nodes);
     }
     // Запоминаем вершину перехода в cash_pw
-    //old_state->cash_pw[symbol] = current_state;
-    while (!path_nodes.empty()){
-        //cash_pw[path_nodes.back()]->at(symbol) = current_state;
-        cash_pw[path_nodes.back()].insert( std::pair<char, int>(symbol,current_state));
+    while (!path_nodes.empty()) {
+        cash_pw[path_nodes.back()].insert(std::pair<char, int>(symbol, current_state));
         path_nodes.pop_back();
     }
     return symbols_id;
@@ -219,13 +217,13 @@ void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std
 
 class Pattern {
 public:
-    Pattern(std::deque<int> &shifts_, int state_size_) :
-            shifts(shifts_), state_size(state_size_) {
+    Pattern(std::deque<int> &shifts_, int state_size_, int text_length_) :
+            shifts(shifts_), state_size(state_size_), text_length(text_length_){
         words_count = shifts_.size();
-        for (int i = 0; i < state_size; i++) {
-            state.push_back(0);
-        }
+        state = new int[state_size_ + text_length_]{0};
+        counter = state_size_;
     };
+
     Pattern(const Pattern &) = delete;
 
     Pattern(Pattern &&) = default;
@@ -234,19 +232,17 @@ public:
 
     Pattern &operator=(Pattern &&) = delete;
 
-    ~Pattern() = default;
+    ~Pattern() = default; // TODO: Изменить
 
     void Step(std::deque<int> &symbols_id, int left_q);
 
-    void Print(int left_q);
-
 private:
-    int counter = 1;
+    int counter;// = 0;
     int words_count; // сколько всего слов
+    int text_length;
     const int state_size; // длина входной строки веместе со всеми ???
     const std::deque<int> &shifts; // на сколько нужно сдвигать
-    std::deque<int> state; // текущая очередь состояний
-    std::deque<int> answer; // то, что возвращать в ответ
+    int * state;
 };
 
 void Pattern::Step(std::deque<int> &symbols_id, const int left_q) {
@@ -255,31 +251,21 @@ void Pattern::Step(std::deque<int> &symbols_id, const int left_q) {
     while (!symbols_id.empty()) {
         id = symbols_id.back();
         symbols_id.pop_back();
-        state[shifts[id]]++;
-    }
-    if (state.back() == words_count) {
-        answer.push_back(counter - state_size - left_q);
+        state[counter - shifts[id]]++; // Отсчет будет не сразу
     }
 
-    state.pop_back();
-    state.push_front(0);
+    if (state[counter - state_size + 1] == words_count){
+        if (counter - state_size - state_size + 1 >= 0) {
+            std::cout << counter - state_size - state_size + 1 << " ";
+        }
+    }
     counter++;
 }
 
-void Pattern::Print(int left_q) {
-    int ans;
-    counter -= 1;
-    while (!answer.empty()) {
-        ans = answer.front() + left_q;
-        if ((ans >= 0) && (ans + state_size <= counter)) {
-            std::cout << ans << " ";
-        }
-        answer.pop_front();
-    }
-}
+
 
 int main() {
-    std::iostream::sync_with_stdio( false );
+    std::iostream::sync_with_stdio(false);
     Trie trie;
     std::string str;
     std::cin >> str;
@@ -298,23 +284,22 @@ int main() {
 
     std::deque<int> out;
 
-    Pattern pattern = Pattern(shifts_, state_size_);
-
     std::string text;
     std::cin >> text;
 
-    for (std::string::iterator it = text.begin(); it != text.end(); ++it) {
+    Pattern pattern = Pattern(shifts_, state_size_, text.length());
 
-        out = trie.Step(*it);
+    for (char & it : text) {
+        out = trie.Step(it);
         pattern.Step(out, left_q);
     }
-
-    pattern.Print(left_q);
-
     return 0;
 }
 
 /*
+ *
+aa??bab?cbaa?
+aabbbabbcbaabaabbbabbcbaab
 
 ?a?a?a?a?a?a?a?a?a?a????????
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -328,11 +313,6 @@ aaa
 
 ab??aba
 ababacaba
-
-
-aa??bab?cbaa?
-aabbbabbcbaabaabbbabbcbaab
-
 
 ba?aab?abab
 aababab
