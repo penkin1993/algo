@@ -99,6 +99,7 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
         while (true) {
             if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
                 parent_id[current_] = go[ref].at(symbol);
+                cash_pw[root_].insert(std::pair<char, int>(symbol, go[ref].at(symbol))); // TODO Определять длинную ссылку прямо здесь ??
                 for (int id : word_num[parent_id[current_]]) { // родительские терминальные варшины (имеют один общий суффикс)
                     word_num[current_].push_back(id);
                 }
@@ -115,7 +116,6 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
         }
     }
 }
-
 
 
 
@@ -137,10 +137,11 @@ std::deque<int> Trie::Step(char symbol) {
         is_finished = step_short_link(symbols_id, symbol, path_nodes);
     }
     // Запоминаем вершину перехода в cash_pw
+    int id;
     while (!path_nodes.empty()) {
-        symbol = path_nodes.back();
+        id = path_nodes.back();
         //if (!cash_pw[symbol].count(symbol)){
-        cash_pw[symbol].insert(std::pair<char, int>(symbol, current_state));
+        cash_pw[id].insert(std::pair<char, int>(symbol, current_state));
         //}
         path_nodes.pop_back();
     }
