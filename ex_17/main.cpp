@@ -23,12 +23,12 @@ public:
 
     void DefLink();
 
-    std::deque<int> Step(char symbol); // основной цикл алгоритма
+    std::vector<int> & Step(char symbol); // основной цикл алгоритма
 
 private:
     int counter_id = 0;
     int current_state = 0; // состояние автомата
-    std::vector<int> path_nodes;
+    std::vector<int> path_nodes; // Создаем буфер из вершин которые посетили и сразу во всех обновляем словрь длинных суффиксных ссылкок
     std::vector<int> node_array; // массив со всеми нодами
     std::vector<int> parent_id; // индекс суффиксной вершины
     std::vector<std::vector<int>> word_num;
@@ -37,9 +37,9 @@ private:
 
     void defLink(std::deque<std::tuple<int, int, char>> &root_deque);
 
-    bool step_down(std::deque<int> &symbols_id, char symbol); // вспомогательная функция основного алгоритма
-    bool step_long_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
-    bool step_short_link(std::deque<int> &symbols_id, char symbol); // вспомогательная функция прохода по ссылкам
+    int step_down(char symbol); // вспомогательная функция основного алгоритма
+    int step_long_link(char symbol); // вспомогательная функция прохода по ссылкам
+    int step_short_link(char symbol); // вспомогательная функция прохода по ссылкам
 };
 
 Trie::Trie() {
@@ -74,7 +74,6 @@ bool Trie::Add(const std::string &key, int id_terminal) {
 
 void Trie::DefLink() {
     std::deque<std::tuple<int, int, char>> root_deque;
-
     for (const auto &iter : go[0]) // добавить в очередь детей и их потомков, поскольку потомки первых детей имею ссылки на корень!!!
     {
         for (const auto &iter_child: go[iter.second]) {
@@ -87,13 +86,13 @@ void Trie::DefLink() {
 
 void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
     while (!root_deque.empty()) {
-        auto element = root_deque.back();
+        std::tuple<int, int, char> element = root_deque.back();
         root_deque.pop_back();
 
         int root_ = std::get<0>(element);
         int current_ = std::get<1>(element);
-        char symbol = std::get<2>(element);
         int ref = parent_id[root_];
+        char symbol = std::get<2>(element);
 
         while (true) {
             if (go[ref].count(symbol)) { // Если существует путь по нужному ребру
@@ -107,7 +106,6 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
             }
             ref = parent_id[ref];
         }
-
         for (const auto &iter : go[current_]) // добавить в очередь детей !!!
         {
             root_deque.push_front(std::make_tuple(current_, iter.second, iter.first)); // обход дочерних вершин
@@ -115,71 +113,71 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
     }
 }
 
-std::deque<int> Trie::Step(char symbol) {
-    bool is_finished = false;
-    std::deque<int> symbols_id;
-    // Создаем буфер из вершин которые посетили и сразу во всех обновляем словрь длинных суффиксных ссылкок
-    path_nodes.push_back(current_state);
-
-    while (!is_finished) {
-        is_finished = step_long_link(symbols_id, symbol);
-        if (is_finished) {
+std::vector<int>& Trie::Step(char symbol) {
+    int is_finished = -1;
+    //std::deque<int> symbols_id;
+    while (is_finished == -1) {
+        is_finished = step_long_link(symbol);
+        if (is_finished != -1) { // пока не вернет что-нибудь нормальное
             break;
         }
-        is_finished = step_down(symbols_id, symbol);
-        if (is_finished) {
+        is_finished = step_down(symbol);
+        if (is_finished != -1) {
             break;
         }
-        is_finished = step_short_link(symbols_id, symbol);
+        is_finished = step_short_link(symbol);
     }
     // Запоминаем вершину перехода в cash_pw
     int id;
     while (!path_nodes.empty()) {
         id = path_nodes.back();
-        //if (!cash_pw[symbol].count(symbol)){
         cash_pw[id].insert(std::pair<char, int>(symbol, current_state));
-        //}
+        //std::cout << id <<  " " << symbol << " " << current_state << "\n";
         path_nodes.pop_back();
     }
-    return symbols_id;
+    //std::cout << "\n";
+    return word_num[current_state];
 }
 
-
-bool Trie::step_down(std::deque<int> &symbols_id, char symbol) {
-    if (go[current_state].count(symbol)) {
-        current_state = go[current_state].at(symbol);
-        for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
-            symbols_id.push_back(id);
+int Trie::step_short_link(char symbol) {
+    path_nodes.push_back(current_state);
+    //std::cout << "short_link \n";
+    current_state = parent_id[current_state]; // прошли по суффиксной ссылке
+    path_nodes.push_back(current_state);
+    if (current_state != 0) {
+        return -1;
+    } else {
+        step_down(symbol);
+        if (current_state != -1){
+            path_nodes.push_back(current_state);
         }
-        return true;
+        return current_state;
     }
-    return false;
 }
 
-bool Trie::step_long_link(std::deque<int> &symbols_id, char symbol) {
+int Trie::step_long_link(char symbol) {
     if (cash_pw[current_state].count(symbol)) { // если есть длнная ссылка в кэше
         current_state = cash_pw[current_state].at(symbol);
-        for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
-            symbols_id.push_back(id);
-        }
-        return true; // прошли по длинной суффиксной ссылке
+        //for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
+        //    symbols_id.push_back(id);
+        //}
+        return current_state; // прошли по длинной суффиксной ссылке
     }
-    return false;
+    return -1;
 }
 
-
-bool Trie::step_short_link(std::deque<int> &symbols_id, char symbol) {
-    current_state = parent_id[current_state]; // прошли по суффиксной ссылке
-    if (current_state != 0) {
-        path_nodes.push_back(current_state);
-        return false;
-    } else {
-        step_down(symbols_id, symbol);
-        return true;
+int Trie::step_down(char symbol) {
+    if (go[current_state].count(symbol)) {
+        current_state = go[current_state].at(symbol);
+        //for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
+        //    symbols_id.push_back(id);
+        //}
+        return current_state;
     }
+    return -1;
 }
 
-void list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str) {
+int list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str) {
     bool new_symbol = false;
     std::string current_string;
     int counter = -1;
@@ -226,7 +224,7 @@ public:
 
     ~Pattern();
 
-    void Step(std::deque<int> &symbols_id);
+    void Step(std::vector<int> &symbols_id);
 
 private:
     int * state;
@@ -241,7 +239,7 @@ Pattern::~Pattern() {
     delete [] state;
 }
 
-void Pattern::Step(std::deque<int> &symbols_id) {
+void Pattern::Step(std::vector<int> &symbols_id) {
     for (int id : symbols_id){
         state[counter - shifts[id]]++; // Отсчет будет не сразу
     }
@@ -271,25 +269,25 @@ int main() {
         words_list.pop_front();
     }
     trie.DefLink();
-
-    std::deque<int> out;
-
     std::string text;
     std::cin >> text;
 
     Pattern pattern = Pattern(shifts_, state_size_, text.length());
 
     for (char & it : text) {
-        out = trie.Step(it);
+        std::vector<int> & out = trie.Step(it);
         pattern.Step(out);
     }
     return 0;
 }
 
 /*
+?a?aa?aaa?aa?a?a?a?a?a?a????????
+aaaaaaaaaaaaaaaaaaaaadaaaaaaaadaaaaaaasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 aa??bab?cbaa?
 aabbbabbcbaabaabbbabbcbaab
+
 
 ?a?a?a?a?a?a?a?a?a?a????????
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
