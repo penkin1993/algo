@@ -81,6 +81,8 @@ private:
 
     int size = 0;
 
+    int rehashing = 0;
+
     static int Hash(const char *str, int m);
 
     static int HashProba(int hash_index, int i, int m);
@@ -145,7 +147,7 @@ bool HashTable<T, THash>::Remove(const T &key) {
     for (int i = 0; i < capacity; i++) {
         if (table[hash_index].key == key) {
             table[hash_index].key = nullKey_;
-            size++;
+            rehashing ++;
             return true;
 
         } else if (!table[hash_index].is_filled) {
@@ -180,6 +182,7 @@ bool HashTable<T, THash>::Add(const T &key) {
             table[*add_index].key = key;
             table[*add_index].is_filled = true;
             size++;
+            rehashing++;
             Expand();
             return true;
         }
@@ -190,7 +193,8 @@ bool HashTable<T, THash>::Add(const T &key) {
 
 template<class T, class THash>
 bool HashTable<T, THash>::Expand() {
-    if (size > (capacity * 3 / 4)) {
+    if (rehashing > (capacity * 3 / 4)) {
+        rehashing = 0;
         size = 0;
 
         int old_capacity = capacity;
