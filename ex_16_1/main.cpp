@@ -16,8 +16,8 @@
 void getShiftArray(std::vector<char> &input_str, std::vector<int> &outputShiftArray) {
     int i = 1;
     int j = 0;
-    input_str.pop_back();
-    outputShiftArray.pop_back();
+    //input_str.pop_back();
+    //outputShiftArray.pop_back();
 
     while (i != input_str.size()) {
         if (input_str[i] == input_str[j]) {
@@ -34,7 +34,7 @@ void getShiftArray(std::vector<char> &input_str, std::vector<int> &outputShiftAr
 };
 
 bool findRows(std::vector<char> &inputStr, std::vector<int> &outputShiftArray,
-              int &shift_index, char & symbol, int &symbol_index, std::vector<int> &findIndex) {
+              int &shift_index, char &symbol, int &symbol_index, std::vector<int> &findIndex) {
     if (symbol == inputStr[shift_index]) {
         symbol_index++;
         shift_index++;
@@ -42,53 +42,58 @@ bool findRows(std::vector<char> &inputStr, std::vector<int> &outputShiftArray,
             findIndex.push_back(symbol_index - inputStr.size());
         }
         return true;
-    }
-    else{
-        if (shift_index == 0){
+    } else {
+        if (shift_index == 0) {
             symbol_index++;
             return true;
-        }
-        else{
+        } else {
             shift_index = outputShiftArray[shift_index - 1];
             return false;
         }
     }
 }
 
-
-int main() {
-    char symbol = ' ';
+void findPattern(std::string &word, std::string &text) {
     std::vector<char> inputStr;
     std::vector<int> outputShiftArray;
 
-    while (symbol != '\n') //Считывание в массив подстроки
-    {
-        std::cin.get(symbol);
-        inputStr.push_back(symbol);
+    for (char symbol_ : word) { //Считывание в массив подстроки
+        inputStr.push_back(symbol_);
         outputShiftArray.push_back(0);
     }
+
     getShiftArray(inputStr, outputShiftArray);
+
+    int i = 0;
     int symbol_index = 0;
     int shift_index = 0;
     std::vector<int> findIndex;
-    bool read_next = true;
-    symbol = ' ';
+    bool read_next = false;
 
-    while (symbol != '\n') //Считывание в массив подстроки
+    while (i < text.length()) //Считывание в массив подстроки
     {
         if (read_next) {
-            std::cin.get(symbol);
+            i++;
         }
-        read_next = findRows(inputStr, outputShiftArray, shift_index, symbol,
-                symbol_index, findIndex);
+        read_next = findRows(inputStr, outputShiftArray, shift_index, text[i],
+                             symbol_index, findIndex);
     }
 
-
-    for (int i : findIndex){
+    for (int i : findIndex) {
         std::cout << i << " ";
     }
 
 
+}
+
+int main() {
+    std::iostream::sync_with_stdio(false);
+    std::string word;
+    std::string text;
+    std::cin >> word;
+    std::cin >> text;
+
+    findPattern(word, text);
     return 0;
 }
 
@@ -105,9 +110,6 @@ abacababa
 aba
 mababamrabab
 */
-
-
-
 
 
 
