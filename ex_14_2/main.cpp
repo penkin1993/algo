@@ -69,25 +69,6 @@ struct CompareEdge {
     }
 };
 
-class EdgeQueue {
-
-public:
-    void add(int left_, int right_, int weight_);
-
-    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *get();
-
-private:
-    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> q;
-};
-
-void EdgeQueue::add(int left_, int right_, int weight_) {
-    q.push(new Edge(left_, right_, weight_));
-}
-
-std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *EdgeQueue::get() {
-    return &q;
-}
-
 class DSU {
 public:
     explicit DSU(size_t size);
@@ -106,10 +87,9 @@ public:
 
     void merge(int left, int right);
 
-    int get(EdgeQueue &edgeQueue);
+    int weight = 0;
 
 private:
-    int weight = 0;
     std::vector<int> parent;
     std::vector<int> rank;
 };
@@ -117,6 +97,7 @@ private:
 DSU::DSU(size_t size) :
         parent(size, -1),
         rank(size, 1) {}
+
 
 int DSU::find(int element) {
     if (parent[element] == -1) {
@@ -136,32 +117,62 @@ void DSU::merge(int deputat_left, int deputat_right) {
     }
 }
 
-int DSU::get(EdgeQueue &edgeQueue) {
-    Edge *edge;
-    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> *q;
-    q = edgeQueue.get();
-    while (!q->empty()) {
-        edge = q->top();
-        q->pop();
 
-        int deputat_left = find(edge->left - 1);
-        int deputat_right = find(edge->right - 1);
+class Graph {
 
-        if (deputat_left != deputat_right) {
-            merge(deputat_left, deputat_right);
-            weight += edge->weight;
-        }
-    }
-    return weight;
+public:
+    explicit Graph(size_t size);
+
+    ~Graph() = default;
+
+    Graph(const Graph &) = delete;
+
+    Graph(Graph &&) = default;
+
+    Graph &operator=(const Graph &) = delete;
+
+    Graph &operator=(Graph &&) = delete;
+
+    void add(int left_, int right_, int weight_);
+
+    int get();
+
+private:
+    DSU dsu;
+    std::priority_queue<Edge *, std::vector<Edge *>, CompareEdge> q;
+};
+
+Graph::Graph(size_t size) : dsu(size) {}
+
+
+void Graph::add(int left_, int right_, int weight_) {
+    q.push(new Edge(left_, right_, weight_));
 }
 
+int Graph::get() {
+    Edge *edge;
+
+    while (!q.empty()) {
+        edge = q.top();
+        q.pop();
+
+        int deputat_left = dsu.find(edge->left - 1);
+        int deputat_right = dsu.find(edge->right - 1);
+
+        if (deputat_left != deputat_right) {
+            dsu.merge(deputat_left, deputat_right);
+            dsu.weight += edge->weight;
+        }
+    }
+    return dsu.weight;
+}
 
 int main() {
     int n_vertices;
     int n_edges;
 
     std::cin >> n_vertices >> n_edges;
-    EdgeQueue edgeQueue;
+    Graph graph(n_vertices);
 
     int left_;
     int right_;
@@ -169,13 +180,10 @@ int main() {
 
     for (int i = 0; i < n_edges; i++) {
         std::cin >> left_ >> right_ >> weight_;
-        edgeQueue.add(left_, right_, weight_);
+        graph.add(left_, right_, weight_);
     }
 
-    DSU spanTree = DSU(n_vertices);
-    int weight = spanTree.get(edgeQueue);
-
-    std::cout << weight;
+    std::cout << graph.get();
     return 0;
 }
 
