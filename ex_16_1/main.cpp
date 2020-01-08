@@ -13,11 +13,11 @@
 #include <iostream>
 #include <vector>
 
-void getShiftArray(std::vector<char> &input_str, std::vector<int> &outputShiftArray) {
+std::vector<int> getShiftArray(const std::string &input_str) {
     int i = 1;
     int j = 0;
-    //input_str.pop_back();
-    //outputShiftArray.pop_back();
+
+    std::vector<int> outputShiftArray(input_str.length(), 0);
 
     while (i != input_str.size()) {
         if (input_str[i] == input_str[j]) {
@@ -31,15 +31,16 @@ void getShiftArray(std::vector<char> &input_str, std::vector<int> &outputShiftAr
             j = outputShiftArray[j - 1];
         }
     }
+    return outputShiftArray;
 };
 
-bool findRows(std::vector<char> &inputStr, std::vector<int> &outputShiftArray,
-              int &shift_index, char &symbol, int &symbol_index, std::vector<int> &findIndex) {
-    if (symbol == inputStr[shift_index]) {
+bool findIndexes(const std::string &word, std::vector<int> &outputShiftArray,
+              int &shift_index, const char &symbol, int &symbol_index, std::vector<int> &findIndex) {
+    if (symbol == word[shift_index]) {
         symbol_index++;
         shift_index++;
-        if (shift_index == inputStr.size()) {
-            findIndex.push_back(symbol_index - inputStr.size());
+        if (shift_index == word.length()) {
+            findIndex.push_back(symbol_index - word.length());
         }
         return true;
     } else {
@@ -53,16 +54,10 @@ bool findRows(std::vector<char> &inputStr, std::vector<int> &outputShiftArray,
     }
 }
 
-void findPattern(std::string &word, std::string &text) {
+std::vector<int> findPattern(const std::string &word, const std::string &text) {
     std::vector<char> inputStr;
-    std::vector<int> outputShiftArray;
 
-    for (char symbol_ : word) { //Считывание в массив подстроки
-        inputStr.push_back(symbol_);
-        outputShiftArray.push_back(0);
-    }
-
-    getShiftArray(inputStr, outputShiftArray);
+    std::vector<int> outputShiftArray = getShiftArray(word);
 
     int i = 0;
     int symbol_index = 0;
@@ -75,15 +70,11 @@ void findPattern(std::string &word, std::string &text) {
         if (read_next) {
             i++;
         }
-        read_next = findRows(inputStr, outputShiftArray, shift_index, text[i],
+        read_next = findIndexes(word, outputShiftArray, shift_index, text[i],
                              symbol_index, findIndex);
     }
 
-    for (int i : findIndex) {
-        std::cout << i << " ";
-    }
-
-
+    return findIndex;
 }
 
 int main() {
@@ -93,7 +84,11 @@ int main() {
     std::cin >> word;
     std::cin >> text;
 
-    findPattern(word, text);
+    std::vector<int> findIndex = findPattern(word, text);
+
+    for (int i : findIndex) {
+        std::cout << i << " ";
+    }
     return 0;
 }
 
@@ -110,9 +105,4 @@ abacababa
 aba
 mababamrabab
 */
-
-
-
-
-
 
