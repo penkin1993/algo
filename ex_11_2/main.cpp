@@ -36,86 +36,79 @@ public:
 
     Graph &operator=(Graph &&) = delete;
 
-    void bfs(int s);
+    void add(int vert_1, int vert_2);
 
-    void add(int &vert_1, int &vert_2);
-
-    int call(int s_in, int s_out);
+    int count_path(int s_in, int s_out) const;
 
 private:
-    int counter_path = 0;
+    std::unordered_map<int, std::pair<std::vector<int>, int>>  bfs(int s) const;
 
-    void rev_bfs(int s_in, int s_out);
-
-    std::unordered_map<int, std::pair<std::vector<int>, int>> graph_structure; // вершина, ребра, степень
+    std::unordered_map<int, std::vector<int>> graph_structure; // вершина, ребра
 };
 
 
 Graph::Graph(int n_vertices) {
     for (int i = 0; i < n_vertices; i++) {
-        graph_structure[i] = std::make_pair(std::vector<int>(0), -1);
+        graph_structure[i] = std::vector<int>(0);
     }
 }
 
-void Graph::add(int &vert_1, int &vert_2) {
-    graph_structure[vert_1].first.push_back(vert_2);
-    graph_structure[vert_2].first.push_back(vert_1);
-    //std::cout << "add " << vert_1;
+void Graph::add(int vert_1, int vert_2) {
+    graph_structure[vert_1].push_back(vert_2);
+    graph_structure[vert_2].push_back(vert_1);
 }
 
-void Graph::bfs(int s) { //
+std::unordered_map<int, std::pair<std::vector<int>, int>> Graph::bfs(int s) const { //
     std::queue<int> q; // буфер для вершин
     q.push(s);
-    int adj_v, v = 0;
-    graph_structure[s].second = 0;
+    int v = 0;
+
+    std::unordered_map<int, std::pair<std::vector<int>, int>> graph_path; // вершина, ребра, степень
+    graph_path[s] = std::make_pair(std::vector<int>(), 0);
+
     while (!q.empty()) {
         v = q.front();
         q.pop();
-        for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
-            adj_v = graph_structure[v].first[i];
-            if (graph_structure[adj_v].second == -1) { // получить все смежные вершины и записать их в стек
-                graph_structure[adj_v].second = graph_structure[v].second + 1;
-                //std::cout << adj_v << " " << graph_structure[adj_v].second << "\n";
-                q.push(adj_v);
+        for (const int adj_v : graph_structure.at(v)){
+            if ( graph_path.find(adj_v) == graph_path.end() ) {
+                // not found
+                graph_path[adj_v] = std::make_pair(std::vector<int>{v}, graph_path[v].second + 1);
+                // добавили вершину родителя и время
+            } else if (graph_path.at(adj_v).second == graph_path[v].second + 1){
+                // если уже есть вершина в словаре, но время прихода в данную вершину из корневой одинаковы
+                graph_path[adj_v].first.push_back(v);
             }
         }
     }
+    return graph_path;
 }
 
+int Graph::count_path(int s_in, int s_out) const {
+    std::unordered_map<int, std::pair<std::vector<int>, int>> graph_path = bfs(s_in);
 
-void Graph::rev_bfs(int s_in, int s_out) {
-    if(s_in == s_out){
-        counter_path++;
-        return;
-    }
-    std::queue<int> q; // буфер для вершин
-    int adj_v, v;
+    int v, local_v = 0;
+    std::vector<int> counter(graph_path[s_out].second + 1, 0);
+    std::queue<int> q;
     q.push(s_out);
-
-    while(!q.empty()) {
+    while (!q.empty()) {
         v = q.front();
         q.pop();
+        while (!graph_path[v].first.empty()){
+            counter[graph_path[v].second]++;// ++ массив
 
-        for (int i = 0; i < graph_structure[v].first.size(); i++) {// итерируемся по всем смежным вершинам
-            adj_v = graph_structure[v].first[i];
-            //std::cout << "Compare " << adj_v << " " <<  graph_structure[adj_v].second << "; " << v << " " << graph_structure[v].second << "\n";
-            if (graph_structure[adj_v].second == (graph_structure[v].second - 1)) {
-                if (adj_v == s_in){
-                    counter_path++;
-                } else{
-                    q.push(adj_v);
-                }
-            }
+            local_v = graph_path[v].first.front();
+            graph_path[v].first.pop_back();
+            q.push(local_v); // добавить элемент в очередь
+
         }
     }
+    int multi = 1;
+    for (const auto& e: counter)
+        multi *= e;
+
+    return multi;
 }
 
-
-int Graph::call(int s_in, int s_out) {
-    bfs(s_in);
-    rev_bfs(s_in, s_out);
-    return counter_path;
-}
 
 int main() {
     int n_vertices = 0;
@@ -135,7 +128,7 @@ int main() {
 
     int s_in, s_out;
     std::cin >> s_in >> s_out;
-    std::cout << graph.call(s_in, s_out);
+    std::cout << graph.count_path(s_in, s_out);
 
     return 0;
 }
@@ -190,5 +183,4 @@ int main() {
 2 3
 0
 */
-
 
