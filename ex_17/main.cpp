@@ -114,53 +114,31 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
 }
 
 std::vector<int>& Trie::Step(char symbol) {
-    int is_finished = -1;
-    //std::deque<int> symbols_id;
-    while (is_finished == -1) {
-        is_finished = step_long_link(symbol);
-        if (is_finished != -1) { // пока не вернет что-нибудь нормальное
+    while (true) {
+        if (step_long_link(symbol) != -1) { // пока не вернет что-нибудь нормальное
             break;
         }
-        is_finished = step_down(symbol);
-        if (is_finished != -1) {
+        if (step_down(symbol) != -1) {
             break;
         }
-        is_finished = step_short_link(symbol);
+
+        if (step_short_link(symbol) != -1) {
+            break;
+        }
     }
     // Запоминаем вершину перехода в cash_pw
     int id;
     while (!path_nodes.empty()) {
         id = path_nodes.back();
         cash_pw[id].insert(std::pair<char, int>(symbol, current_state));
-        //std::cout << id <<  " " << symbol << " " << current_state << "\n";
         path_nodes.pop_back();
     }
-    //std::cout << "\n";
     return word_num[current_state];
-}
-
-int Trie::step_short_link(char symbol) {
-    path_nodes.push_back(current_state);
-    //std::cout << "short_link \n";
-    current_state = parent_id[current_state]; // прошли по суффиксной ссылке
-    path_nodes.push_back(current_state);
-    if (current_state != 0) {
-        return -1;
-    } else {
-        step_down(symbol);
-        if (current_state != -1){
-            path_nodes.push_back(current_state);
-        }
-        return current_state;
-    }
 }
 
 int Trie::step_long_link(char symbol) {
     if (cash_pw[current_state].count(symbol)) { // если есть длнная ссылка в кэше
         current_state = cash_pw[current_state].at(symbol);
-        //for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
-        //    symbols_id.push_back(id);
-        //}
         return current_state; // прошли по длинной суффиксной ссылке
     }
     return -1;
@@ -169,13 +147,31 @@ int Trie::step_long_link(char symbol) {
 int Trie::step_down(char symbol) {
     if (go[current_state].count(symbol)) {
         current_state = go[current_state].at(symbol);
-        //for (int id : word_num[current_state]) { // перешли в новое состояние и запушили id слов
-        //    symbols_id.push_back(id);
-        //}
         return current_state;
     }
     return -1;
 }
+
+int Trie::step_short_link(char symbol) {
+    path_nodes.push_back(current_state);
+    current_state = parent_id[current_state]; // прошли по суффиксной ссылке
+    path_nodes.push_back(current_state);
+    if (current_state != 0) {
+        return -1;
+    } else {
+        step_down(symbol);
+        //if (current_state != 0){
+        path_nodes.push_back(current_state);
+        //}
+        return current_state;
+    }
+}
+
+
+
+
+
+
 
 int list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str) {
     bool new_symbol = false;
@@ -253,6 +249,8 @@ void Pattern::Step(std::vector<int> &symbols_id) {
 }
 
 
+
+
 int main() {
     std::iostream::sync_with_stdio(false);
     Trie trie;
@@ -281,9 +279,13 @@ int main() {
     return 0;
 }
 
+
 /*
 ?a?aa?aaa?aa?a?a?a?a?a?a????????
 aaaaaaaaaaaaaaaaaaaaadaaaaaaaadaaaaaaasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+a?
+aaaaaaaqaaaa
 
 aa??bab?cbaa?
 aabbbabbcbaabaabbbabbcbaab
