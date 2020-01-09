@@ -24,7 +24,7 @@ public:
 
     void DefLink();
 
-    std::vector<int> & Step(char symbol); // основной цикл алгоритма
+    std::vector<int> &Step(char symbol); // основной цикл алгоритма
 
 private:
     int counter_id = 0;
@@ -102,7 +102,7 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
                     word_num[current_].push_back(id);
                 }
                 break;
-            } else if (ref == 0){
+            } else if (ref == 0) {
                 break;
             }
             ref = parent_id[ref];
@@ -114,7 +114,7 @@ void Trie::defLink(std::deque<std::tuple<int, int, char>> &root_deque) {
     }
 }
 
-std::vector<int>& Trie::Step(char symbol) {
+std::vector<int> &Trie::Step(char symbol) {
     while (true) {
         if (step_long_link(symbol) != -1) { // пока не вернет что-нибудь нормальное
             break;
@@ -169,11 +169,6 @@ int Trie::step_short_link(char symbol) {
 }
 
 
-
-
-
-
-
 int list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std::string &str) {
     bool new_symbol = false;
     std::string current_string;
@@ -205,7 +200,7 @@ int list_fill(std::deque<std::string> &word_dict, std::deque<int> &shifts_, std:
 class Pattern {
 public:
     Pattern(std::deque<int> &shifts_, int state_size_, int text_length_) :
-            shifts(shifts_), state_size(state_size_), text_length(text_length_){
+            shifts(shifts_), state_size(state_size_), text_length(text_length_) {
         words_count = shifts_.size();
         state = new int[state_size_ + text_length_]{0};
         counter = state_size_;
@@ -224,7 +219,7 @@ public:
     void Step(std::vector<int> &symbols_id);
 
 private:
-    int * state;
+    int *state;
     int counter;
     int words_count; // сколько всего слов
     int text_length;
@@ -233,15 +228,15 @@ private:
 };
 
 Pattern::~Pattern() {
-    delete [] state;
+    delete[] state;
 }
 
 void Pattern::Step(std::vector<int> &symbols_id) {
-    for (int id : symbols_id){
+    for (int id : symbols_id) {
         state[counter - shifts[id]]++; // Отсчет будет не сразу
     }
 
-    if (state[counter - state_size + 1] == words_count){
+    if (state[counter - state_size + 1] == words_count) {
         if (counter - state_size - state_size + 1 >= 0) {
             std::cout << counter - state_size - state_size + 1 << " ";
         }
@@ -263,7 +258,7 @@ int main() {
     Trie trie;
     std::string str;
     //std::cin >> str;
-    getline(file,str);
+    getline(file, str);
     int state_size_ = str.length();
 
     std::deque<std::string> words_list;
@@ -277,13 +272,13 @@ int main() {
     trie.DefLink();
     std::string text;
     //std::cin >> text;
-    getline(file,text);
+    getline(file, text);
     file.close();
 
     Pattern pattern = Pattern(shifts_, state_size_, text.length());
 
-    for (char & it : text) {
-        std::vector<int> & out = trie.Step(it);
+    for (char &it : text) {
+        std::vector<int> &out = trie.Step(it);
         pattern.Step(out);
     }
     return 0;
