@@ -1,4 +1,5 @@
 .idea
 cmake-build*/
 *.txt
+.DS_Store
 
