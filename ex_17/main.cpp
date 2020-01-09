@@ -3,6 +3,7 @@
 #include <vector>
 #include <deque>
 #include <map>
+#include <fstream>
 
 
 class Trie {
@@ -249,13 +250,20 @@ void Pattern::Step(std::vector<int> &symbols_id) {
 }
 
 
-
-
 int main() {
+    std::ifstream file; // создаем объект класса ifstream
+    file.open("./input.txt"); // открываем файл
+
+    //std::string s;
+    //getline(file,s);
+    //std::cout << s << std::endl;
+
+
     std::iostream::sync_with_stdio(false);
     Trie trie;
     std::string str;
-    std::cin >> str;
+    //std::cin >> str;
+    getline(file,str);
     int state_size_ = str.length();
 
     std::deque<std::string> words_list;
@@ -268,7 +276,9 @@ int main() {
     }
     trie.DefLink();
     std::string text;
-    std::cin >> text;
+    //std::cin >> text;
+    getline(file,text);
+    file.close();
 
     Pattern pattern = Pattern(shifts_, state_size_, text.length());
 
